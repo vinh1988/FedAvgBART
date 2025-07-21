@@ -116,7 +116,7 @@ if __name__ == "__main__":
             'ResNet10', 'ResNet18', 'ResNet34',
             'ShuffleNet', 'MobileNeXt', 'SqueezeNeXt', 'MobileViT', 
             'StackedLSTM', 'StackedTransformer', 'LogReg', 'M5',
-            'DistilBert', 'SqueezeBert', 'MobileBert'
+            'DistilBert', 'SqueezeBert', 'MobileBert', 'TinyBERT'
         ],
         required=True
     )
@@ -173,6 +173,7 @@ if __name__ == "__main__":
     parser.add_argument('--lr_decay_step', help='intervals of learning rate decay', type=int, default=20)
     parser.add_argument('--criterion', help='objective function (NOTE: should be a submodule of `torch.nn`, thus case-sensitive)', type=str, required=True)
     parser.add_argument('--mu', help='constant for proximity regularization term (valid only if the algorithm is `fedprox`)', type=float, choices=[Range(0., 1e6)], default=0.01)
+    parser.add_argument('--pretrained_model_name', type=str, default='huawei-noah/TinyBERT_General_4L_312D', help='HuggingFace model name for TinyBERT')
 
     # parse arguments
     args = parser.parse_args()

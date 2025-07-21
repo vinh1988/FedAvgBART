@@ -6,6 +6,10 @@ import torchtext
 import torchvision
 import transformers
 import concurrent.futures
+from datasets import load_dataset as hf_load_dataset
+
+# Make torchtext_datasets compatible with both new and old torchtext versions
+# torchtext_datasets = torchtext.datasets
 
 from src import TqdmToLogger, stratified_split
 from src.datasets import *
@@ -49,7 +53,8 @@ def load_dataset(args):
     TOKENIZER_STRINGS = {
         'DistilBert': 'distilbert-base-uncased',
         'SqueezeBert': 'squeezebert/squeezebert-uncased',
-        'MobileBert': 'google/mobilebert-uncased'
+        'MobileBert': 'google/mobilebert-uncased',
+        'TinyBERT': 'huawei-noah/TinyBERT_General_4L_312D'
     } 
     
     # error manager
@@ -121,18 +126,52 @@ def load_dataset(args):
     ####################
     tokenizer = None
     if args.use_model_tokenizer or args.use_pt_model:
-        assert args.model_name in ['DistilBert', 'SqueezeBert', 'MobileBert'], 'Please specify a proper model!'
+        assert args.model_name in ['DistilBert', 'SqueezeBert', 'MobileBert', 'TinyBERT'], 'Please specify a proper model!'
 
     if args.use_model_tokenizer:
-        assert args.model_name.lower() in transformers.models.__dict__.keys(), f'Please check if the model (`{args.model_name}`) is supported by `transformers` module!'
-        module = transformers.models.__dict__[f'{args.model_name.lower()}']
-        tokenizer = getattr(module, f'{args.model_name}Tokenizer').from_pretrained(TOKENIZER_STRINGS[args.model_name])
+        if args.model_name == 'TinyBERT':
+            from transformers import BertTokenizer
+            tokenizer = BertTokenizer.from_pretrained(TOKENIZER_STRINGS[args.model_name])
+        else:
+            assert args.model_name.lower() in transformers.models.__dict__.keys(), f'Please check if the model (`{args.model_name}`) is supported by `transformers` module!'
+            module = transformers.models.__dict__[f'{args.model_name.lower()}']
+            tokenizer = getattr(module, f'{args.model_name}Tokenizer').from_pretrained(TOKENIZER_STRINGS[args.model_name])
 
     #################
     # fetch dataset #
     #################
     logger.info(f'[LOAD] Fetch dataset!')
     
+    # Special case: Use HuggingFace datasets for AG_NEWS if torchtext.datasets is not available
+    if args.dataset == 'AG_NEWS':
+        assert tokenizer is not None, 'Tokenizer must be provided for AG_NEWS with HuggingFace datasets.'
+        train_dataset = hf_load_dataset('ag_news', split='train')
+        test_dataset = hf_load_dataset('ag_news', split='test')
+
+        def encode_batch(batch):
+            return tokenizer(batch['text'], padding='max_length', truncation=True, max_length=args.seq_len)
+
+        train_dataset = train_dataset.map(encode_batch, batched=True)
+        test_dataset = test_dataset.map(encode_batch, batched=True)
+        train_dataset.set_format(type='torch', columns=['input_ids', 'attention_mask', 'label'])
+        test_dataset.set_format(type='torch', columns=['input_ids', 'attention_mask', 'label'])
+
+        # Wrap in torch.utils.data.Dataset for compatibility
+        class HFDatasetWrapper(torch.utils.data.Dataset):
+            def __init__(self, hf_dataset):
+                self.dataset = hf_dataset
+            def __getitem__(self, idx):
+                item = self.dataset[idx]
+                return (item['input_ids'], item['label'])
+            def __len__(self):
+                return len(self.dataset)
+
+        raw_train = HFDatasetWrapper(train_dataset)
+        raw_test = HFDatasetWrapper(test_dataset)
+        args.num_classes = 4
+        args.num_embeddings = tokenizer.vocab_size
+        return raw_test, [(raw_train, raw_test) for _ in range(args.K)]
+
     if args.dataset in ['FEMNIST', 'Shakespeare', 'Sent140', 'CelebA', 'Reddit']: # 1) for a special dataset - LEAF benchmark...
         _check_and_raise_error(args.split_type, 'pre', 'split scenario', False)
         _check_and_raise_error(args.eval_type, 'local', 'evaluation type', False)
@@ -166,7 +205,7 @@ def load_dataset(args):
         transforms = [_get_transform(args, train=True), _get_transform(args, train=False)]
         raw_train, raw_test, args = fetch_torchvision_dataset(args=args, dataset_name=args.dataset, root=args.data_path, transforms=transforms)
         
-    elif args.dataset in torchtext.datasets.__dict__.keys(): # 4) for downloadable datasets in `torchtext.datasets`...
+    elif args.dataset in torchtext_datasets.__dict__.keys(): # 4) for downloadable datasets in `torchtext.datasets`...
         _check_and_raise_error(args.split_type, 'pre', 'split scenario')
         raw_train, raw_test, args = fetch_torchtext_dataset(args=args, dataset_name=args.dataset, root=args.data_path, seq_len=args.seq_len, tokenizer=tokenizer, num_embeddings=args.num_embeddings) 
         
