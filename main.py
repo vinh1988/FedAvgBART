@@ -116,7 +116,7 @@ if __name__ == "__main__":
             'ResNet10', 'ResNet18', 'ResNet34',
             'ShuffleNet', 'MobileNeXt', 'SqueezeNeXt', 'MobileViT', 
             'StackedLSTM', 'StackedTransformer', 'LogReg', 'M5',
-            'DistilBert', 'SqueezeBert', 'MobileBert', 'TinyBERT'
+            'DistilBert', 'SqueezeBert', 'MobileBert', 'TinyBERT', 'BertBase'
         ],
         required=True
     )
@@ -173,11 +173,18 @@ if __name__ == "__main__":
     parser.add_argument('--lr_decay_step', help='intervals of learning rate decay', type=int, default=20)
     parser.add_argument('--criterion', help='objective function (NOTE: should be a submodule of `torch.nn`, thus case-sensitive)', type=str, required=True)
     parser.add_argument('--mu', help='constant for proximity regularization term (valid only if the algorithm is `fedprox`)', type=float, choices=[Range(0., 1e6)], default=0.01)
-    parser.add_argument('--pretrained_model_name', type=str, default='huawei-noah/TinyBERT_General_4L_312D', help='HuggingFace model name for TinyBERT')
+    parser.add_argument('--pretrained_model_name', type=str, default=None, help='HuggingFace model name for TinyBERT or BertBase')
 
     # parse arguments
     args = parser.parse_args()
-    
+
+    # Automatically set pretrained_model_name if not provided
+    if not hasattr(args, 'pretrained_model_name') or not args.pretrained_model_name:
+        if args.model_name == 'TinyBERT':
+            args.pretrained_model_name = 'huawei-noah/TinyBERT_General_4L_312D'
+        elif args.model_name == 'BertBase':
+            args.pretrained_model_name = 'bert-base-uncased'
+        
     # make path for saving losses & metrics & models
     curr_time = time.strftime("%y%m%d_%H%M%S", time.localtime())
     args.result_path = os.path.join(args.result_path, f'{args.exp_name}_{curr_time}')

@@ -20,3 +20,4 @@ from .femnistcnn import FEMNISTCNN
 from .sent140lstm import Sent140LSTM
 from .stackedtransformer import StackedTransformer
 from .tinybert import TinyBERT
+from .bertbase import BertBase

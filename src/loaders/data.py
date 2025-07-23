@@ -54,7 +54,8 @@ def load_dataset(args):
         'DistilBert': 'distilbert-base-uncased',
         'SqueezeBert': 'squeezebert/squeezebert-uncased',
         'MobileBert': 'google/mobilebert-uncased',
-        'TinyBERT': 'huawei-noah/TinyBERT_General_4L_312D'
+        'TinyBERT': 'huawei-noah/TinyBERT_General_4L_312D',
+        'BertBase': 'bert-base-uncased'
     } 
     
     # error manager
@@ -126,10 +127,10 @@ def load_dataset(args):
     ####################
     tokenizer = None
     if args.use_model_tokenizer or args.use_pt_model:
-        assert args.model_name in ['DistilBert', 'SqueezeBert', 'MobileBert', 'TinyBERT'], 'Please specify a proper model!'
+        assert args.model_name in ['DistilBert', 'SqueezeBert', 'MobileBert', 'TinyBERT', 'BertBase'], 'Please specify a proper model!'
 
     if args.use_model_tokenizer:
-        if args.model_name == 'TinyBERT':
+        if args.model_name == 'TinyBERT' or args.model_name == 'BertBase':
             from transformers import BertTokenizer
             tokenizer = BertTokenizer.from_pretrained(TOKENIZER_STRINGS[args.model_name])
         else:
