@@ -25,16 +25,25 @@ This repository contains an implementation of Federated Learning with BERT for t
 - **Test Samples**: 7,532
 - **Model**: BERT-base-uncased
 - **Clients**: 3
-- **Rounds**: 5
+- **Rounds**: 20
 - **Local Epochs**: 2
 - **Batch Size**: 16
 - **Learning Rate**: 2e-5
+- **Alpha (Dirichlet)**: 0.5
 
-### Final Evaluation Metrics
+### Final Evaluation Metrics (After 20 Rounds)
 ```
-Test Loss: 1.1520, Accuracy: 67.62%
-F1 Score: 0.6836, Precision: 0.7058, Recall: 0.6762
+Test Loss: 1.9797, Accuracy: 69.32%
+F1 Score: 0.7000, Precision: 0.7187, Recall: 0.6932
 ```
+
+### Performance Improvement (5 Rounds → 20 Rounds)
+| Metric     | 5 Rounds | 20 Rounds | Improvement |
+|------------|----------|-----------|-------------|
+| Accuracy   | 67.62%   | 69.32%    | +1.70%      |
+| F1 Score   | 0.6836   | 0.7000    | +0.0164     |
+| Precision  | 0.7058   | 0.7187    | +0.0129     |
+| Recall     | 0.6762   | 0.6932    | +0.0170     |
 
 ### Performance by Round
 | Round | Test Accuracy | F1 Score | Precision | Recall |
@@ -44,42 +53,54 @@ F1 Score: 0.6836, Precision: 0.7058, Recall: 0.6762
 | 3     | 65.29%        | 0.6578   | 0.6938    | 0.6529 |
 | 4     | 67.64%        | 0.6832   | 0.7015    | 0.6764 |
 | 5     | 67.62%        | 0.6836   | 0.7058    | 0.6762 |
+| ...   | ...           | ...      | ...       | ...    |
+| 20    | 69.32%        | 0.7000   | 0.7187    | 0.6932 |
 
-### Per-Class Metrics (Final Round)
-| Class | F1     | Precision | Recall   |
-|-------|--------|-----------|----------|
-| 0     | 0.4671 | 0.4671    | 0.4671   |
-| 1     | 0.6626 | 0.6317    | 0.6967   |
-| 2     | 0.6353 | 0.6762    | 0.5990   |
-| 3     | 0.6144 | 0.6300    | 0.5995   |
-| 4     | 0.5701 | 0.4453    | 0.7922   |
-| 5     | 0.7812 | 0.8624    | 0.7139   |
-| 6     | 0.7778 | 0.8485    | 0.7179   |
-| 7     | 0.7304 | 0.7007    | 0.7626   |
-| 8     | 0.6812 | 0.8097    | 0.5879   |
-| 9     | 0.8556 | 0.9215    | 0.7985   |
-| 10    | 0.8702 | 0.8585    | 0.8822   |
-| 11    | 0.7131 | 0.7950    | 0.6465   |
-| 12    | 0.5959 | 0.5665    | 0.6285   |
-| 13    | 0.8135 | 0.8750    | 0.7601   |
-| 14    | 0.7784 | 0.7906    | 0.7665   |
-| 15    | 0.7018 | 0.8392    | 0.6030   |
-| 16    | 0.5943 | 0.5207    | 0.6923   |
-| 17    | 0.7898 | 0.8408    | 0.7447   |
-| 18    | 0.4785 | 0.4732    | 0.4839   |
-| 19    | 0.3440 | 0.2982    | 0.4064   |
+### Per-Class Metrics (After 20 Rounds)
+| Class | F1     | Precision | Recall   | Improvement (F1) |
+|-------|--------|-----------|----------|------------------|
+| 0     | 0.4717 | 0.5924    | 0.3918   | +0.0046          |
+| 1     | 0.6899 | 0.6292    | 0.7635   | +0.0273          |
+| 2     | 0.6262 | 0.6000    | 0.6548   | -0.0091          |
+| 3     | 0.6716 | 0.6507    | 0.6939   | +0.0572          |
+| 4     | 0.7292 | 0.7311    | 0.7273   | +0.1591          |
+| 5     | 0.7945 | 0.8727    | 0.7291   | +0.0133          |
+| 6     | 0.8295 | 0.8704    | 0.7923   | +0.0517          |
+| 7     | 0.6257 | 0.5461    | 0.7323   | -0.1047          |
+| 8     | 0.7423 | 0.7920    | 0.6985   | +0.0611          |
+| 9     | 0.8595 | 0.9271    | 0.8010   | +0.0039          |
+| 10    | 0.8721 | 0.8483    | 0.8972   | +0.0019          |
+| 11    | 0.7208 | 0.7493    | 0.6944   | +0.0077          |
+| 12    | 0.6138 | 0.6277    | 0.6005   | +0.0179          |
+| 13    | 0.8360 | 0.8937    | 0.7854   | +0.0225          |
+| 14    | 0.7808 | 0.8482    | 0.7234   | +0.0024          |
+| 15    | 0.6705 | 0.7845    | 0.5854   | -0.0313          |
+| 16    | 0.5921 | 0.5356    | 0.6621   | -0.0022          |
+| 17    | 0.8248 | 0.8567    | 0.7952   | +0.0350          |
+| 18    | 0.4734 | 0.5055    | 0.4452   | -0.0051          |
+| 19    | 0.3509 | 0.2653    | 0.5179   | +0.0069          |
 
 ### Key Observations
 - **Best Performing Classes (F1 > 0.8)**:
-  - Class 9 (0.8556)
-  - Class 10 (0.8702)
-  - Class 13 (0.8135)
-  - Class 14 (0.7784)
-  - Class 17 (0.7898)
-- **Classes Needing Improvement (F1 < 0.5)**:
-  - Class 0 (0.4671)
-  - Class 18 (0.4785)
-  - Class 19 (0.3440)
+  - Class 10 (0.8721) - Best overall performance
+  - Class 9 (0.8595)
+  - Class 13 (0.8360)
+  - Class 17 (0.8248)
+  - Class 6 (0.8295) - New addition to high performers
+  - Class 14 (0.7808)
+- **Most Improved Classes (F1 increase > 0.05)**:
+  - Class 4: +0.1591 (0.5701 → 0.7292)
+  - Class 3: +0.0572 (0.6144 → 0.6716)
+  - Class 8: +0.0611 (0.6812 → 0.7423)
+  - Class 6: +0.0517 (0.7778 → 0.8295)
+- **Classes Needing Attention (F1 < 0.5)**:
+  - Class 0 (0.4717) - Slight improvement (+0.0046)
+  - Class 18 (0.4734) - Minor regression (-0.0051)
+  - Class 19 (0.3509) - Small improvement (+0.0069)
+- **Areas for Improvement**:
+  - Class 7 showed a significant drop in performance (-0.1047)
+  - Class 15 also decreased (-0.0313)
+  - Consider class imbalance and potential overfitting for these classes
 
 ## Implementation Details
 ## Getting Started
