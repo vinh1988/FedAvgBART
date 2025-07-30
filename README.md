@@ -58,7 +58,37 @@ Implementations of various Federated Learning (FL) algorithms in PyTorch, especi
 - [ ] Support another model, especially lightweight ones for cross-device FL setting. (e.g., [`EdgeNeXt`](https://github.com/mmaaz60/EdgeNeXt))
 - [ ] Support another structured dataset including temporal and tabular data, along with datasets suitable for cross-silo FL setting. (e.g., [`MedMNIST`](https://github.com/MedMNIST/MedMNIST))
 - [ ] Add other popular FL algorithms including personalized FL algorithms (e.g., [`SuPerFed`](https://arxiv.org/abs/2109.07628)).
-- [ ] Attach benchmark results of sample commands.
+## Benchmark Results
+
+### BERT-base on AG News Classification
+
+**Configuration**:
+- Model: BERT-base-uncased
+- Dataset: AG News (4 classes)
+- Clients: 3
+- Rounds: 2
+- Local Epochs: 1
+- Batch Size: 8
+- Learning Rate: 2e-5
+- Sequence Length: 128
+
+**Results**:
+```
+Test Loss: 0.5063, Accuracy: 87.59%
+F1 Score: 0.8712, Precision: 0.8964, Recall: 0.8759
+
+Per-class metrics:
+Class   F1      Precision       Recall
+0       0.9299  0.9115          0.9489
+1       0.9840  0.9797          0.9884
+2       0.8277  0.7256          0.9632
+3       0.7434  0.9687          0.6032
+```
+
+**Command**:
+```bash
+python run_bert_agnews.py --num_clients 3 --num_rounds 2 --local_epochs 1 --batch_size 8
+```
 
 ## Contact
 Should you have any feedback, please create a thread in __issue__ tab. Thank you :)
