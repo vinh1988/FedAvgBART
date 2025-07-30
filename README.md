@@ -2,7 +2,142 @@
 # Federated Learning in PyTorch
 Implementations of various Federated Learning (FL) algorithms in PyTorch, especially for research purposes.
 
+# Federated BERT for Text Classification
+
+This repository contains an implementation of Federated Learning with BERT for text classification tasks, specifically optimized for the 20 Newsgroups dataset. The implementation includes support for non-IID data distribution across clients using Dirichlet distribution.
+
+## Features
+
+- Federated Learning with BERT-base-uncased
+- Support for 20 Newsgroups text classification
+- Non-IID data partitioning using Dirichlet distribution
+- Client-side model training with local updates
+- Centralized model aggregation (FedAvg)
+- Comprehensive evaluation metrics (accuracy, F1, precision, recall)
+- Progress tracking with tqdm
+- GPU acceleration support
+
+## Results
+
+### 20 Newsgroups Classification
+- **Dataset**: 20 Newsgroups (20 classes)
+- **Training Samples**: 11,314
+- **Test Samples**: 7,532
+- **Model**: BERT-base-uncased
+- **Clients**: 3
+- **Rounds**: 5
+- **Local Epochs**: 2
+- **Batch Size**: 16
+- **Learning Rate**: 2e-5
+
+### Final Evaluation Metrics
+```
+Test Loss: 1.1520, Accuracy: 67.62%
+F1 Score: 0.6836, Precision: 0.7058, Recall: 0.6762
+```
+
+### Performance by Round
+| Round | Test Accuracy | F1 Score | Precision | Recall |
+|-------|---------------|----------|-----------|--------|
+| 1     | 8.27%         | 0.0377   | 0.1095    | 0.0827 |
+| 2     | 9.63%         | 0.0596   | 0.1778    | 0.0963 |
+| 3     | 65.29%        | 0.6578   | 0.6938    | 0.6529 |
+| 4     | 67.64%        | 0.6832   | 0.7015    | 0.6764 |
+| 5     | 67.62%        | 0.6836   | 0.7058    | 0.6762 |
+
+### Per-Class Metrics (Final Round)
+| Class | F1     | Precision | Recall   |
+|-------|--------|-----------|----------|
+| 0     | 0.4671 | 0.4671    | 0.4671   |
+| 1     | 0.6626 | 0.6317    | 0.6967   |
+| 2     | 0.6353 | 0.6762    | 0.5990   |
+| 3     | 0.6144 | 0.6300    | 0.5995   |
+| 4     | 0.5701 | 0.4453    | 0.7922   |
+| 5     | 0.7812 | 0.8624    | 0.7139   |
+| 6     | 0.7778 | 0.8485    | 0.7179   |
+| 7     | 0.7304 | 0.7007    | 0.7626   |
+| 8     | 0.6812 | 0.8097    | 0.5879   |
+| 9     | 0.8556 | 0.9215    | 0.7985   |
+| 10    | 0.8702 | 0.8585    | 0.8822   |
+| 11    | 0.7131 | 0.7950    | 0.6465   |
+| 12    | 0.5959 | 0.5665    | 0.6285   |
+| 13    | 0.8135 | 0.8750    | 0.7601   |
+| 14    | 0.7784 | 0.7906    | 0.7665   |
+| 15    | 0.7018 | 0.8392    | 0.6030   |
+| 16    | 0.5943 | 0.5207    | 0.6923   |
+| 17    | 0.7898 | 0.8408    | 0.7447   |
+| 18    | 0.4785 | 0.4732    | 0.4839   |
+| 19    | 0.3440 | 0.2982    | 0.4064   |
+
+### Key Observations
+- **Best Performing Classes (F1 > 0.8)**:
+  - Class 9 (0.8556)
+  - Class 10 (0.8702)
+  - Class 13 (0.8135)
+  - Class 14 (0.7784)
+  - Class 17 (0.7898)
+- **Classes Needing Improvement (F1 < 0.5)**:
+  - Class 0 (0.4671)
+  - Class 18 (0.4785)
+  - Class 19 (0.3440)
+
 ## Implementation Details
+## Getting Started
+
+### Prerequisites
+
+- Python 3.8+
+- PyTorch 1.12.0+
+- Transformers 4.18.0+
+- scikit-learn
+- tqdm
+
+### Installation
+
+1. Clone the repository:
+```bash
+git clone https://github.com/yourusername/federated-bert.git
+cd federated-bert
+```
+
+2. Install the required packages:
+```bash
+pip install -r requirements.txt
+```
+
+### Usage
+
+#### Training
+
+To train the federated BERT model on the 20 Newsgroups dataset:
+
+```bash
+python run_bert_20news.py \
+    --num_clients 3 \
+    --num_rounds 5 \
+    --local_epochs 2 \
+    --batch_size 16 \
+    --max_length 128 \
+    --learning_rate 2e-5 \
+    --seed 42 \
+    --test_batch_size 32 \
+    --alpha 0.5
+```
+
+#### Arguments
+
+- `--num_clients`: Number of clients in federated learning
+- `--num_rounds`: Number of federated learning rounds
+- `--local_epochs`: Number of local training epochs per round
+- `--batch_size`: Training batch size
+- `--max_length`: Maximum sequence length for BERT
+- `--learning_rate`: Learning rate for AdamW optimizer
+- `--test_batch_size`: Batch size for evaluation
+- `--alpha`: Dirichlet distribution parameter for non-IID split (smaller values create more heterogeneous data distribution)
+- `--seed`: Random seed for reproducibility
+
+## Implementation Details
+
 ### Datasets
 * Supports all image classification datasets in `torchvision.datasets`.
 * Supports all text classification datasets in `torchtext.datasets`.
@@ -53,6 +188,44 @@ Implementations of various Federated Learning (FL) algorithms in PyTorch, especi
 
 ## Example Commands
 * See shell files prepared in `commands` directory.
+
+## Performance Optimization
+
+### Class Imbalance
+- The current implementation shows varying performance across different classes
+- Consider implementing class weights in the loss function
+- Potential improvements through oversampling minority classes or undersampling majority classes
+
+### Hyperparameter Tuning
+- Experiment with different learning rates and scheduling strategies
+- Try different batch sizes based on available GPU memory
+- Adjust the number of local epochs and federated rounds
+
+### Model Architecture
+- Current implementation uses BERT-base-uncased with a custom classifier head
+- Potential to experiment with different BERT variants (e.g., DistilBERT, RoBERTa)
+- Consider adding additional regularization techniques
+
+## Future Work
+
+- [ ] Implement class weighting for imbalanced datasets
+- [ ] Add learning rate scheduling with warmup
+- [ ] Support for more BERT variants and architectures
+- [ ] Add differential privacy for enhanced privacy guarantees
+- [ ] Implement client selection strategies based on data distribution
+- [ ] Add support for more text classification datasets
+- [ ] Implement model compression techniques for edge deployment
+- [ ] Add support for cross-silo federated learning
+
+## Acknowledgements
+
+- [HuggingFace Transformers](https://github.com/huggingface/transformers)
+- [PyTorch](https://pytorch.org/)
+- [scikit-learn](https://scikit-learn.org/)
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## TODO
 - [ ] Support another model, especially lightweight ones for cross-device FL setting. (e.g., [`EdgeNeXt`](https://github.com/mmaaz60/EdgeNeXt))
