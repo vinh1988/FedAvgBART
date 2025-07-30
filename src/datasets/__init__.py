@@ -9,3 +9,4 @@ from .adult import fetch_adult
 from .cover import fetch_cover
 from .gleam import fetch_gleam
 from .speechcommands import fetch_speechcommands
+from .agnews import load_agnews_data

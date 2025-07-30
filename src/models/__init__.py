@@ -19,3 +19,4 @@ from .simplecnn import SimpleCNN
 from .femnistcnn import FEMNISTCNN
 from .sent140lstm import Sent140LSTM
 from .stackedtransformer import StackedTransformer
+from .bert_model import BERT
