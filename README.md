@@ -1,6 +1,99 @@
 
 # Federated Learning in PyTorch
+
 Implementations of various Federated Learning (FL) algorithms in PyTorch, especially for research purposes.
+
+## Federated Text Classification with DistilBART
+
+This repository contains an implementation of Federated Learning with DistilBART for text classification on the 20 Newsgroups dataset. The implementation includes support for non-IID data distribution across clients using Dirichlet distribution.
+
+## Features
+
+- Federated Learning with DistilBART (distilled version of BART)
+- Support for 20 Newsgroups text classification (20 classes)
+- Non-IID data partitioning using Dirichlet distribution
+- Client-side model training with local updates
+- Centralized model aggregation (FedAvg)
+- Comprehensive evaluation metrics (accuracy, F1, precision, recall)
+- Progress tracking with tqdm
+- GPU acceleration support
+
+## Getting Started
+
+### Prerequisites
+
+- Python 3.8+
+- PyTorch 1.12.0+
+- Transformers 4.18.0+
+- scikit-learn
+- tqdm
+- numpy
+- pandas
+- matplotlib
+- tensorboard
+
+### Installation
+
+1. Clone the repository:
+```bash
+git clone https://github.com/yourusername/FED-OPT-BERT.git
+cd FED-OPT-BERT
+```
+
+2. Install the required packages:
+```bash
+pip install -r requirements.txt
+```
+
+### Usage
+
+#### Training
+
+To train the federated DistilBART model on the 20 Newsgroups dataset:
+
+```bash
+python train_distilbart_20news.py \
+    --num_clients 3 \
+    --num_rounds 5 \
+    --epochs_per_client 1 \
+    --batch_size 16 \
+    --learning_rate 2e-5 \
+    --max_grad_norm 1.0 \
+    --data_dir "./data/20news" \
+    --model_save_path "./saved_models/distilbart_20news"
+```
+
+#### Arguments
+
+- `--num_clients`: Number of clients in federated learning (default: 3)
+- `--num_rounds`: Number of federated learning rounds (default: 5)
+- `--epochs_per_client`: Number of local training epochs per client (default: 1)
+- `--batch_size`: Training batch size (default: 16)
+- `--learning_rate`: Learning rate for AdamW optimizer (default: 2e-5)
+- `--max_grad_norm`: Maximum gradient norm for gradient clipping (default: 1.0)
+- `--data_dir`: Directory to store/load the dataset (default: "./data/20news")
+- `--model_save_path`: Path to save the trained model (default: "./saved_models/distilbart_20news")
+
+## Implementation Details
+
+### Model Architecture
+- Based on DistilBART (distilled version of BART) from Hugging Face
+- Custom classification head for 20 Newsgroups classification
+- Tokenizer: DistilBERT tokenizer with a maximum sequence length of 128 tokens
+
+### Training Process
+1. The global model is initialized with pre-trained DistilBART weights
+2. In each federated round:
+   - A subset of clients is selected
+   - Each client trains the model on its local data
+   - Model updates are sent to the server
+   - The server aggregates the updates using FedAvg
+   - The global model is updated with the aggregated weights
+
+### Evaluation
+- Accuracy, Precision, Recall, F1 Score
+- Confusion matrix
+- Per-class metrics
 
 ## Implementation Details
 ### Datasets
@@ -53,6 +146,34 @@ Implementations of various Federated Learning (FL) algorithms in PyTorch, especi
 
 ## Example Commands
 * See shell files prepared in `commands` directory.
+
+## Performance Optimization
+
+### Class Imbalance
+- The 20 Newsgroups dataset has relatively balanced classes
+- Consider implementing class weights if needed for specific non-IID scenarios
+
+### Hyperparameter Tuning
+- Experiment with different learning rates and scheduling strategies
+- Try different batch sizes based on available GPU memory
+- Adjust the number of local epochs and federated rounds
+
+## Future Work
+
+- [ ] Implement learning rate scheduling with warmup
+- [ ] Add support for more text classification datasets
+- [ ] Implement model compression techniques for edge deployment
+- [ ] Add support for cross-silo federated learning
+
+## Acknowledgements
+
+- [HuggingFace Transformers](https://github.com/huggingface/transformers)
+- [PyTorch](https://pytorch.org/)
+- [scikit-learn](https://scikit-learn.org/)
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## TODO
 - [ ] Support another model, especially lightweight ones for cross-device FL setting. (e.g., [`EdgeNeXt`](https://github.com/mmaaz60/EdgeNeXt))
