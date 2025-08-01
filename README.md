@@ -1,8 +1,109 @@
 
 # Federated Learning in PyTorch
+
 Implementations of various Federated Learning (FL) algorithms in PyTorch, especially for research purposes.
 
-# Federated BERT for Text Classification
+## Federated Text Summarization with DistilBART
+
+This repository contains an implementation of Federated Learning with DistilBART for abstractive text summarization on the CNN/DailyMail dataset. The implementation includes support for federated training of sequence-to-sequence models with non-IID data distribution across clients.
+
+## Features
+
+- Federated Learning with DistilBART (distilled version of BART)
+- Support for CNN/DailyMail dataset for text summarization
+- Non-IID data partitioning
+- Client-side model training with local updates
+- Centralized model aggregation (FedAvg)
+- ROUGE score evaluation
+- Progress tracking with tqdm
+- GPU acceleration support
+- Memory-efficient training with gradient accumulation
+
+## Getting Started
+
+### Prerequisites
+
+- Python 3.8+
+- PyTorch 1.12.0+
+- Transformers 4.18.0+
+- datasets (Hugging Face)
+- rouge-score
+- tqdm
+- numpy
+
+### Installation
+
+1. Clone the repository:
+```bash
+git clone https://github.com/yourusername/FED-OPT-BERT.git
+cd FED-OPT-BERT
+```
+
+2. Install the required packages:
+```bash
+pip install -r requirements.txt
+```
+
+### Usage
+
+#### Training
+
+To train the federated DistilBART model on the CNN/DailyMail dataset:
+
+```bash
+python train_distilbart_cnndm.py \
+    --num_clients 3 \
+    --num_rounds 1 \
+    --epochs_per_client 1 \
+    --batch_size 2 \
+    --learning_rate 5e-5 \
+    --max_grad_norm 1.0 \
+    --data_dir "./data/cnndm" \
+    --model_save_path "./saved_models/distilbart_cnndm"
+```
+
+#### Arguments
+
+- `--num_clients`: Number of clients in federated learning (default: 3)
+- `--num_rounds`: Number of federated learning rounds (default: 1)
+- `--epochs_per_client`: Number of local training epochs per client (default: 1)
+- `--batch_size`: Training batch size (default: 2)
+- `--learning_rate`: Learning rate for AdamW optimizer (default: 5e-5)
+- `--max_grad_norm`: Maximum gradient norm for gradient clipping (default: 1.0)
+- `--data_dir`: Directory to store/load the dataset (default: "./data/cnndm")
+- `--model_save_path`: Path to save the trained model (default: "./saved_models/distilbart_cnndm")
+
+## Implementation Details
+
+### Model Architecture
+- Based on DistilBART (distilled version of BART) from Hugging Face
+- Sequence-to-sequence model for abstractive summarization
+- Tokenizer: BART tokenizer with a maximum sequence length of 1024 tokens
+
+### Training Process
+1. The global model is initialized with pre-trained DistilBART weights
+2. In each federated round:
+   - A subset of clients is selected
+   - Each client trains the model on its local data
+   - Model updates are sent to the server
+   - The server aggregates the updates using FedAvg
+   - The global model is updated with the aggregated weights
+
+### Evaluation
+- ROUGE scores (ROUGE-1, ROUGE-2, ROUGE-L)
+- Example generations during training
+- Model checkpoints are saved after each round
+
+## Memory Management
+
+The implementation includes several memory optimization techniques:
+- Gradient accumulation for larger effective batch sizes
+- Mixed precision training (FP16)
+- Dynamic batching
+- Gradient checkpointing
+- Memory-efficient attention
+
+## Federated BERT for Text Classification
 
 This repository contains an implementation of Federated Learning with BERT for text classification tasks, specifically optimized for the 20 Newsgroups dataset. The implementation includes support for non-IID data distribution across clients using Dirichlet distribution.
 
@@ -117,8 +218,8 @@ F1 Score: 0.7000, Precision: 0.7187, Recall: 0.6932
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/yourusername/federated-bert.git
-cd federated-bert
+git clone https://github.com/yourusername/FED-OPT-BERT.git
+cd FED-OPT-BERT
 ```
 
 2. Install the required packages:
