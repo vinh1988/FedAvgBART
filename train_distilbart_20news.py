@@ -2,10 +2,13 @@ import os
 import sys
 import torch
 import numpy as np
+import pandas as pd
+from datetime import datetime
 from torch.utils.data import DataLoader
 from torch.optim import AdamW
 from torch.nn import CrossEntropyLoss
 from tqdm import tqdm
+from sklearn.metrics import precision_recall_fscore_support, accuracy_score
 
 # Add parent directory to path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -16,13 +19,25 @@ from src.datasets.news20 import load_20newsgroups
 def train():
     # Configuration
     num_clients = 10
-    num_rounds = 2
-    epochs_per_client = 3
+    num_rounds = 22
+    epochs_per_client =3
     batch_size = 16
     learning_rate = 2e-5
     max_seq_length = 128
     data_dir = "./data/20newsgroups"
     model_save_path = "./saved_models/distilbart_20news"
+    
+    # Create results directory
+    os.makedirs("results", exist_ok=True)
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    results_file = f"results/training_metrics_{timestamp}.csv"
+    
+    # Initialize metrics storage
+    metrics_columns = [
+        'round', 'client_id', 'epoch', 'phase',
+        'loss', 'accuracy', 'precision', 'recall', 'f1'
+    ]
+    metrics_data = []
     
     # Set device
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -128,10 +143,25 @@ def train():
                     total += labels.size(0)
                     correct += (predicted == labels).sum().item()
                 
-                # Print epoch statistics
+                # Calculate metrics
                 avg_loss = total_loss / len(train_loader)
                 accuracy = 100 * correct / total
-                print(f"Client {client_idx} - Epoch {epoch+1}: Loss: {avg_loss:.4f}, Acc: {accuracy:.2f}%")
+                
+                # Store training metrics
+                metrics_data.append({
+                    'round': round_num,
+                    'client_id': client_idx,
+                    'epoch': epoch + 1,
+                    'phase': 'train',
+                    'loss': avg_loss,
+                    'accuracy': accuracy / 100,  # Convert to 0-1 range
+                    'precision': np.nan,  # Will be calculated during evaluation
+                    'recall': np.nan,     # Will be calculated during evaluation
+                    'f1': np.nan          # Will be calculated during evaluation
+                })
+                
+                print(f"Client {client_idx} - Epoch {epoch+1}: "
+                      f"Loss: {avg_loss:.4f}, Acc: {accuracy:.2f}%")
             
             # Store updated model and data size
             client_models.append(local_model.state_dict())
@@ -157,8 +187,11 @@ def train():
         # Evaluate global model on test set
         print("\nEvaluating global model...")
         model.eval()
-        test_correct = 0
-        test_total = 0
+        
+        # Initialize metrics for validation
+        all_preds = []
+        all_labels = []
+        val_loss = 0.0
         
         with torch.no_grad():
             for client_idx in range(min(3, num_clients)):  # Evaluate on first 3 clients for efficiency
@@ -177,15 +210,44 @@ def train():
                     
                     outputs = model(
                         input_ids=input_ids,
-                        attention_mask=attention_mask
+                        attention_mask=attention_mask,
+                        labels=labels
                     )
                     
+                    val_loss += outputs.loss.item()
                     _, predicted = torch.max(outputs.logits, 1)
-                    test_total += labels.size(0)
-                    test_correct += (predicted == labels).sum().item()
+                    
+                    all_preds.extend(predicted.cpu().numpy())
+                    all_labels.extend(labels.cpu().numpy())
         
-        test_accuracy = 100 * test_correct / test_total
-        print(f"Global model test accuracy: {test_accuracy:.2f}%")
+        # Calculate validation metrics
+        val_loss /= len(all_preds)  # Average loss per sample
+        accuracy = accuracy_score(all_labels, all_preds)
+        precision, recall, f1, _ = precision_recall_fscore_support(
+            all_labels, all_preds, average='weighted', zero_division=0
+        )
+        
+        # Store validation metrics
+        metrics_data.append({
+            'round': round_num,
+            'client_id': -1,  # -1 indicates global model evaluation
+            'epoch': epochs_per_client,  # Last epoch of the round
+            'phase': 'validation',
+            'loss': val_loss,
+            'accuracy': accuracy,
+            'precision': precision,
+            'recall': recall,
+            'f1': f1
+        })
+        
+        print(f"Round {round_num} - Validation: "
+              f"Loss: {val_loss:.4f}, Acc: {accuracy*100:.2f}%, "
+              f"Precision: {precision:.4f}, Recall: {recall:.4f}, F1: {f1:.4f}")
+        
+        # Save metrics to CSV after each round
+        metrics_df = pd.DataFrame(metrics_data, columns=metrics_columns)
+        metrics_df.to_csv(results_file, index=False)
+        print(f"Metrics saved to {results_file}")
         
         # Save model checkpoint
         os.makedirs(model_save_path, exist_ok=True)
@@ -196,6 +258,11 @@ def train():
         }, os.path.join(model_save_path, f'model_round_{round_num}.pt'))
         
         print(f"Model checkpoint saved to {model_save_path}")
+    
+    # Final metrics summary
+    print("\nTraining completed. Final metrics summary:")
+    metrics_df = pd.read_csv(results_file)
+    print(metrics_df.groupby(['phase']).mean(numeric_only=True)[['loss', 'accuracy', 'precision', 'recall', 'f1']])
 
 if __name__ == "__main__":
     train()
