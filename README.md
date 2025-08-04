@@ -15,8 +15,10 @@ This repository contains an implementation of Federated Learning with DistilBART
 - Client-side model training with local updates
 - Centralized model aggregation (FedAvg)
 - Comprehensive evaluation metrics (accuracy, F1, precision, recall)
-- Progress tracking with tqdm
+- Progress tracking with tqdm and Weights & Biases
 - GPU acceleration support
+- Experiment tracking and visualization
+- Model checkpointing and versioning
 
 ## Getting Started
 
@@ -30,7 +32,7 @@ This repository contains an implementation of Federated Learning with DistilBART
 - numpy
 - pandas
 - matplotlib
-- tensorboard
+- Weights & Biases (`wandb`)
 
 ### Installation
 
@@ -44,6 +46,12 @@ cd FED-OPT-BERT
 ```bash
 pip install -r requirements.txt
 ```
+
+3. Log in to Weights & Biases (if you haven't already):
+```bash
+wandb login
+```
+   Follow the instructions to authenticate with your Weights & Biases account. If you don't have an account, you can create one at [wandb.ai](https://wandb.ai).
 
 ### Usage
 
@@ -74,6 +82,42 @@ python train_distilbart_20news.py \
 - `--data_dir`: Directory to store/load the dataset (default: "./data/20news")
 - `--model_save_path`: Path to save the trained model (default: "./saved_models/distilbart_20news")
 
+## Experiment Tracking with Weights & Biases
+
+This project uses Weights & Biases (wandb) for experiment tracking, visualization, and model management. Each training run is automatically logged to your wandb account, where you can:
+
+- Track training and validation metrics in real-time
+- Compare different runs and hyperparameters
+- Monitor system resource usage (CPU/GPU/memory)
+- Save and version model checkpoints
+- Visualize model predictions
+
+### Logged Metrics
+
+- **Training Metrics** (per client, per epoch):
+  - Loss
+  - Accuracy
+  - Precision (weighted)
+  - Recall (weighted)
+  - F1 Score (weighted)
+
+- **Validation Metrics** (per round):
+  - Loss
+  - Accuracy
+  - Precision (weighted)
+  - Recall (weighted)
+  - F1 Score (weighted)
+
+### Viewing Results
+
+1. During or after training, visit your [Weights & Biases dashboard](https://wandb.ai/)
+2. Select your project (`federated-distilbart-20news` by default)
+3. Explore the different tabs:
+   - **Charts**: Interactive plots of all metrics
+   - **System**: Resource utilization
+   - **Models**: Saved model checkpoints
+   - **Files**: Logs and artifacts
+
 ## Implementation Details
 
 ### Model Architecture
@@ -94,6 +138,8 @@ python train_distilbart_20news.py \
 - Accuracy, Precision, Recall, F1 Score
 - Confusion matrix
 - Per-class metrics
+- Real-time tracking with Weights & Biases
+- Automatic logging of all metrics and model checkpoints
 
 ## Implementation Details
 ### Datasets
@@ -147,6 +193,34 @@ python train_distilbart_20news.py \
 ## Example Commands
 * See shell files prepared in `commands` directory.
 
+## Experiment Results
+
+### Latest Training Run (2025-03-08)
+- **Model**: DistilBART-base
+- **Dataset**: 20 Newsgroups
+- **Configuration**:
+  - Number of clients: 10
+  - Federated rounds: 22
+  - Epochs per client: 1
+  - Batch size: 16
+  - Learning rate: 2e-5
+  - Max sequence length: 128 tokens
+
+### Performance Metrics (Final Round)
+| Metric | Training | Validation |
+|--------|----------|------------|
+| Loss   | 0.644    | 0.062      |
+| Accuracy | 0.798  | 0.724      |
+| Precision | 0.835 | 0.727     |
+| Recall | 0.830    | 0.724      |
+| F1 Score | 0.829  | 0.720      |
+
+### Performance Trends
+- The model shows consistent improvement over federated rounds
+- Training metrics show good convergence
+- Validation metrics indicate the model generalizes well
+- The gap between training and validation metrics suggests some overfitting, which is expected with local training
+
 ## Performance Optimization
 
 ### Class Imbalance
@@ -157,6 +231,12 @@ python train_distilbart_20news.py \
 - Experiment with different learning rates and scheduling strategies
 - Try different batch sizes based on available GPU memory
 - Adjust the number of local epochs and federated rounds
+- Use Weights & Biases Sweeps for automated hyperparameter optimization
+
+### Memory Management
+- Gradient accumulation for large batch sizes
+- Mixed precision training (FP16) support
+- Gradient checkpointing for memory efficiency
 
 ## Future Work
 
@@ -164,12 +244,17 @@ python train_distilbart_20news.py \
 - [ ] Add support for more text classification datasets
 - [ ] Implement model compression techniques for edge deployment
 - [ ] Add support for cross-silo federated learning
+- [ ] Add support for federated learning with differential privacy
+- [ ] Implement model distillation for better client-side efficiency
+- [ ] Add support for federated learning with secure aggregation
 
 ## Acknowledgements
 
 - [HuggingFace Transformers](https://github.com/huggingface/transformers)
 - [PyTorch](https://pytorch.org/)
 - [scikit-learn](https://scikit-learn.org/)
+- [Weights & Biases](https://wandb.ai/)
+- [FedML](https://fedml.ai/) for federated learning inspiration
 
 ## License
 
