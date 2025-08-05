@@ -20,8 +20,8 @@ from src.datasets.news20 import load_20newsgroups
 def train():
     # Configuration
     config = {
-        'num_clients': 10,
-        'num_rounds': 22,
+        'num_clients': 2,
+        'num_rounds': 1,
         'epochs_per_client': 1,
         'batch_size': 16,
         'learning_rate': 2e-5,
