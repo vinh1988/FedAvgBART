@@ -27,6 +27,49 @@ This repository contains an implementation of Federated Learning with DistilBART
 
 ## Latest Results
 
+### Centralized DistilBART Training on 20 Newsgroups
+
+#### Training Configuration
+- **Model**: DistilBART (facebook/bart-base-distilled)
+- **Epochs**: 22
+- **Batch size**: 8
+- **Learning rate**: 2e-5
+- **Max sequence length**: 128
+- **Optimizer**: AdamW
+- **Loss function**: Cross-Entropy
+- **Dataset**: 20 Newsgroups (train/validation/test split: 80%/10%/10%)
+
+#### Performance Metrics
+| Phase | Accuracy | F1 Score | Precision | Recall | Loss |
+|-------|----------|----------|-----------|--------|------|
+| Training | 97.20% | 0.9727 | 0.9745 | 0.9720 | 0.0936 |
+| Validation | 73.27% | 0.7354 | 0.7445 | 0.7327 | 1.4344 |
+| Test | 69.48% | 0.6976 | 0.7096 | 0.6948 | 1.7408 |
+
+#### Key Observations
+1. **Training Performance**: Achieved high training accuracy (97.20%) with strong F1 score (0.9727)
+2. **Generalization**: Validation and test metrics show good alignment (73.27% vs 69.48% accuracy)
+3. **Efficiency**: Training completed successfully with stable convergence
+4. **Comparison with BART**:
+   - Slightly lower accuracy than full BART (69.48% vs 73.50%)
+   - More efficient training with faster convergence
+   - Smaller model size (66M vs 139M parameters)
+
+#### Visualization
+To generate training curves and metrics visualization:
+
+```bash
+python visualize_centralized.py \
+    --metrics_file "results_distilbart_20news_centralized/training_metrics_centralized_20250806_132751.csv" \
+    --output_dir "results/plots_results_distil_bart_20news_centralized"
+```
+
+This will generate the following visualizations:
+- Individual metric plots (loss, accuracy, F1, precision, recall) over epochs
+- Combined metrics plot
+- Final metrics comparison
+- Correlation heatmaps for training and validation metrics
+
 ### Centralized BART Training on 20 Newsgroups
 
 #### Training Configuration
