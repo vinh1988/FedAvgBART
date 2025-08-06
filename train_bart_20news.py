@@ -1,10 +1,11 @@
 import os
 import sys
+import argparse
 import torch
 import numpy as np
 import pandas as pd
 from datetime import datetime
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, random_split, Subset
 from torch.optim import AdamW
 from torch.nn import CrossEntropyLoss
 from tqdm import tqdm
@@ -17,21 +18,49 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from src.models.bart import BART
 from src.datasets.news20 import load_20newsgroups, News20Dataset
 from transformers import BartTokenizerFast
-from torch.utils.data import Subset
+
+def parse_args():
+    parser = argparse.ArgumentParser(description='Train BART in a federated learning setup on 20 Newsgroups dataset')
+    
+    # Required parameters
+    parser.add_argument('--num_clients', type=int, default=10,
+                        help='Number of clients in the federated learning setup')
+    parser.add_argument('--num_rounds', type=int, default=22,
+                        help='Number of communication rounds')
+    parser.add_argument('--epochs_per_client', type=int, default=1,
+                        help='Number of local epochs per client')
+    parser.add_argument('--batch_size', type=int, default=8,
+                        help='Batch size for training and evaluation')
+    parser.add_argument('--learning_rate', type=float, default=2e-5,
+                        help='Learning rate for the optimizer')
+    parser.add_argument('--max_grad_norm', type=float, default=1.0,
+                        help='Maximum gradient norm for gradient clipping')
+    parser.add_argument('--data_dir', type=str, default="./data/20newsgroups",
+                        help='Directory containing the 20 Newsgroups dataset')
+    parser.add_argument('--model_save_path', type=str, default="./saved_models/bart_20news",
+                        help='Path to save the trained model checkpoints')
+    parser.add_argument('--max_seq_length', type=int, default=128,
+                        help='Maximum sequence length for tokenization')
+    
+    return parser.parse_args()
 
 def train():
+    # Parse command line arguments
+    args = parse_args()
+    
     # Configuration
     config = {
-        'num_clients': 10,
-        'num_rounds': 22,
-        'epochs_per_client': 1,
-        'batch_size': 8,  # Reduced batch size for BART as it's larger than DistilBART
-        'learning_rate': 2e-5,
-        'max_seq_length': 128,
+        'num_clients': args.num_clients,
+        'num_rounds': args.num_rounds,
+        'epochs_per_client': args.epochs_per_client,
+        'batch_size': args.batch_size,
+        'learning_rate': args.learning_rate,
+        'max_grad_norm': args.max_grad_norm,
+        'max_seq_length': args.max_seq_length,
         'model_name': 'bart-20news',
         'project_name': 'federated-bart-20news',
-        'data_dir': "./data/20newsgroups",
-        'model_save_path': "./saved_models/bart_20news"
+        'data_dir': args.data_dir,
+        'model_save_path': args.model_save_path
     }
     
     # Initialize wandb
