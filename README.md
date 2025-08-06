@@ -27,7 +27,50 @@ This repository contains an implementation of Federated Learning with DistilBART
 
 ## Latest Results
 
-### BART Model on 20 Newsgroups
+### Centralized BART Training on 20 Newsgroups
+
+#### Training Configuration
+- **Model**: BART-base
+- **Epochs**: 22
+- **Batch size**: 8
+- **Learning rate**: 2e-5
+- **Max sequence length**: 128
+- **Optimizer**: AdamW
+- **Loss function**: Cross-Entropy
+- **Dataset**: 20 Newsgroups (train/validation/test split: 80%/10%/10%)
+
+#### Performance Metrics
+| Phase | Accuracy | F1 Score | Precision | Recall | Loss |
+|-------|----------|----------|-----------|--------|------|
+| Training | 99.98% | 0.9998 | 0.9998 | 0.9998 | 0.0005 |
+| Validation | 74.00% | 0.7392 | 0.7409 | 0.7400 | 1.0008 |
+| Test | 73.50% | 0.7346 | 0.7362 | 0.7350 | 1.0234 |
+
+#### Key Observations
+1. **Training Performance**: The model achieves near-perfect training metrics, indicating strong learning capacity
+2. **Generalization**: Validation and test metrics are closely aligned (74.0% vs 73.5%), suggesting good generalization
+3. **Overfitting**: The gap between training and validation metrics indicates some overfitting, which is expected with a large model
+4. **Correlation Analysis**:
+   - Strong negative correlation between loss and accuracy in training (-1.0)
+   - High positive correlation between F1 and accuracy in both training (1.0) and validation (0.995)
+   - Strong correlation between precision and recall in both phases (~0.96-1.0)
+
+#### Visualization
+To generate training curves and metrics visualization:
+
+```bash
+python visualize_centralized.py \
+    --metrics_file "results_bart_20news_centralized/training_metrics_centralized_20250806_111734.csv" \
+    --output_dir "results/plots_centralized"
+```
+
+This will generate the following visualizations:
+- Individual metric plots (loss, accuracy, F1, precision, recall) over epochs
+- Combined metrics plot
+- Final metrics comparison
+- Correlation heatmaps for training and validation metrics
+
+### Federated BART Model on 20 Newsgroups
 
 #### Training Configuration
 - **Number of clients**: 10
@@ -94,13 +137,23 @@ This repository contains an implementation of Federated Learning with DistilBART
 - matplotlib
 - Weights & Biases (`wandb`)
 
-### Training with BART
+### Centralized Training with BART
 
-To train the BART model:
+To train the BART model with centralized data:
 
 ```bash
-python train_bart_20news.py
+python train_bart_20news_centralized.py \
+    --num_epochs 3 \
+    --batch_size 8 \
+    --learning_rate 2e-5 \
+    --max_seq_length 128 \
+    --output_dir "./results_bart_20news_centralized" \
+    --save_metrics
 ```
+
+### Federated Training with BART
+
+To train the BART model with federated learning:
 
 ### Training with DistilBART
 
