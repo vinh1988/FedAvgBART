@@ -1,0 +1,38 @@
+# Model configuration
+model_name: "facebook/bart-large-cnn"
+max_source_length: 1024
+max_target_length: 142
+
+# Training configuration
+num_clients: 10
+num_rounds: 13
+clients_per_round: 2
+local_epochs: 1
+batch_size: 8
+learning_rate: 5e-5
+weight_decay: 0.01
+warmup_steps: 500
+max_grad_norm: 1.0
+
+# Data configuration
+data_dir: "./data/cnndm"
+train_split: "train"
+val_split: "validation"
+test_split: "test"
+# For smaller dataset testing
+max_train_samples: null  # Set to null to use full dataset
+max_val_samples: null    # Set to null to use full dataset
+max_test_samples: null   # Set to null to use full dataset
+
+# Generation parameters
+num_beams: 4
+length_penalty: 2.0
+no_repeat_ngram_size: 3
+
+# Logging
+output_dir: "./results_distilbart_cnndm_federated"
+logging_steps: 100
+eval_steps: 500
+save_steps: 1000
+seed: 42
+use_wandb: true
