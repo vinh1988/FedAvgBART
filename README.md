@@ -1,47 +1,51 @@
 
 # Federated Learning for Text Summarization with DistilBART
 
-This repository contains an implementation of Federated Learning with DistilBART for abstractive text summarization on the CNN/DailyMail dataset. The implementation supports federated training of sequence-to-sequence models with non-IID data distribution across clients.
+This repository contains an implementation of Federated Learning with DistilBART for abstractive text summarization on the CNN/DailyMail dataset. The implementation supports federated training of sequence-to-sequence models with non-IID data distribution across clients, along with comprehensive visualization and analysis tools.
 
-## 📊 Latest Results (2025-08-07)
+## 📊 Latest Results (2025-08-09)
 
-### Final Evaluation Metrics (Round 13)
-- **Loss**: 1.7397
-- **ROUGE-1**: 28.25
-- **ROUGE-2**: 32.49
-- **ROUGE-L**: 29.36
+### Performance Across Different Client Counts
+| Clients | ROUGE-1 | ROUGE-2 | ROUGE-L |
+|---------|---------|---------|---------|
+| 2       | 33.36   | 9.82    | 20.15   |
+| 3       | 34.28   | 13.82   | 22.73   |
+| 4       | 37.95   | 14.50   | 23.43   |
+| 5       | 35.87   | 14.24   | 26.05   |
 
-### Training Configuration
-- **Model**: DistilBART (facebook/bart-large-cnn)
-- **Number of Clients**: 10
-- **Clients per Round**: 5
-- **Local Epochs**: 1
-- **Batch Size**: 16
-- **Learning Rate**: 5e-5
-- **Max Sequence Length**: 1024 tokens
-- **Max Target Length**: 142 tokens
-
-### Performance Trends
-- The model shows consistent improvement in ROUGE scores throughout training
-- Best validation loss achieved: 1.7397
-- Stable convergence with federated averaging
+### Model Configuration
+- **Base Model**: DistilBART (facebook/bart-large-cnn)
+- **Federated Learning**: FedAvg with weighted aggregation
+- **Client Selection**: Random sampling per round
+- **Evaluation**: Performed on a held-out test set
 
 ### Key Observations
-- The model achieves competitive ROUGE scores while maintaining data privacy
-- Federated training demonstrates effective knowledge sharing across clients
-- The implementation handles the non-IID nature of client data effectively
+- The model achieves strong performance while maintaining data privacy
+- Performance generally improves with more clients, indicating effective knowledge sharing
+- The implementation handles non-IID data distribution effectively
+- ROUGE-L scores show particular improvement with more clients
 
 ## ✨ Features
 
-- Federated Learning with DistilBART (distilled version of BART)
-- Support for CNN/DailyMail dataset for text summarization
-- Non-IID data partitioning
-- Client-side model training with local updates
-- Centralized model aggregation (FedAvg)
-- ROUGE score evaluation
-- Progress tracking with tqdm
-- GPU acceleration support
-- Memory-efficient training with gradient accumulation
+- **Federated Learning** with DistilBART (distilled version of BART)
+- **Multi-client Training** with configurable client counts and participation rates
+- **Comprehensive Metrics**:
+  - ROUGE scores (ROUGE-1, ROUGE-2, ROUGE-L)
+  - Training and evaluation loss tracking
+  - Client contribution analysis
+- **Visualization Tools**:
+  - Performance comparison across client counts
+  - Client contribution heatmaps
+  - ROUGE score trends
+  - Data distribution analysis
+- **Efficient Training**:
+  - Gradient accumulation
+  - Mixed precision training
+  - Memory optimization
+- **Flexible Configuration**:
+  - YAML-based configuration
+  - Command-line overrides
+  - Experiment tracking
 
 ## Getting Started
 
@@ -68,36 +72,85 @@ cd fed-distilbart-cnndm
 pip install -r requirements.txt
 ```
 
-### Usage
+## 🚀 Training and Evaluation
 
-#### Training
+### 1. Run Federated Training
 
-To train the federated DistilBART model on the CNN/DailyMail dataset:
+To train the federated DistilBART model with different numbers of clients:
 
 ```bash
-python train_distilbart_cnndm.py \
-    --num_clients 3 \
-    --num_rounds 1 \
-    --epochs_per_client 1 \
-    --batch_size 2 \
-    --learning_rate 5e-5 \
-    --max_grad_norm 1.0 \
-    --data_dir "./data/cnndm" \
-    --model_save_path "./saved_models/distilbart_cnndm"
+# For a single client configuration
+python train_fed_distilbart_cnndm.py --config configs/distilbart_cnndm.yaml --num_clients 5
+
+# Or use the experiment runner for multiple client configurations
+python run_experiments.py --config configs/distilbart_cnndm.yaml --min-clients 2 --max-clients 10 --num-rounds 13
 ```
 
-#### Arguments
+### 2. Analyze Results
 
-- `--num_clients`: Number of clients in federated learning (default: 3)
-- `--num_rounds`: Number of federated learning rounds (default: 1)
-- `--epochs_per_client`: Number of local training epochs per client (default: 1)
-- `--batch_size`: Training batch size (default: 2)
-- `--learning_rate`: Learning rate for AdamW optimizer (default: 5e-5)
-- `--max_grad_norm`: Maximum gradient norm for gradient clipping (default: 1.0)
-- `--data_dir`: Directory to store/load the dataset (default: "./data/cnndm")
-- `--model_save_path`: Path to save the trained model (default: "./saved_models/distilbart_cnndm")
+After training, generate visualizations and analysis:
 
-## 🏗️ Implementation Details
+```bash
+# Generate performance comparison and contribution analysis
+python run_experiments.py --skip-training --min-clients 2 --max-clients 5
+
+# Or generate specific visualizations
+python -m src.visualization.visualize_contributions --results-dir experiment_results
+```
+
+### 3. Key Configuration Options
+
+Edit `configs/distilbart_cnndm.yaml` to customize:
+
+```yaml
+training:
+  num_rounds: 10
+  clients_per_round: 3
+  batch_size: 8
+  learning_rate: 5e-5
+  max_seq_length: 1024
+  max_target_length: 142
+  
+model:
+  model_name: "facebook/bart-large-cnn"
+  tokenizer_name: "facebook/bart-large-cnn"
+  
+data:
+  train_split: "train"
+  val_split: "validation"
+  test_split: "test"
+  max_samples: null  # Set to number for debugging
+```
+
+## 📊 Understanding the Metrics
+
+### ROUGE Scores
+- **ROUGE-1**: Measures unigram (single word) overlap between generated and reference summaries
+- **ROUGE-2**: Measures bigram (two consecutive words) overlap
+- **ROUGE-L**: Measures the longest common subsequence, capturing sentence-level structure
+
+### Client Contribution Metrics
+- **Data Volume**: Amount of training data per client
+- **Gradient Updates**: Magnitude and direction of model updates
+- **ROUGE Impact**: Contribution to model performance improvement
+
+### Training Metrics
+- **Loss**: Cross-entropy loss on the training data
+- **Validation Loss**: Model performance on held-out validation data
+- **Round Time**: Time taken per federated round
+
+## 📈 Visualization Examples
+
+### Performance Comparison
+![Performance Comparison](experiment_results/analysis/performance_comparison.png)
+
+### Client Contribution Heatmap
+![Contribution Heatmap](experiment_results/analysis/contribution_heatmap.png)
+
+### ROUGE Score Trends
+![ROUGE Trends](experiment_results/analysis/rouge_trends.png)
+
+## 🔍 Implementation Details
 
 ### Model Architecture
 - Based on DistilBART (distilled version of BART) from Hugging Face

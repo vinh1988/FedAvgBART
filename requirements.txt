@@ -9,3 +9,4 @@ tensorboard>=2.6.0
 datasets>=2.0.0
 sentencepiece>=0.1.962
 rouge-score>=0.0.4
+tabulate

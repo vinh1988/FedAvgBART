@@ -5,7 +5,7 @@ max_target_length: 142
 
 # Training configuration
 num_clients: 10
-num_rounds: 13
+num_rounds: 12
 clients_per_round: 2
 local_epochs: 1
 batch_size: 8
@@ -19,10 +19,10 @@ data_dir: "./data/cnndm"
 train_split: "train"
 val_split: "validation"
 test_split: "test"
-# For smaller dataset testing
-max_train_samples: null  # Set to null to use full dataset
-max_val_samples: null    # Set to null to use full dataset
-max_test_samples: null   # Set to null to use full dataset
+# Dataset configuration
+max_train_samples: null  # Samples per client for training
+max_val_samples: null     # Samples per client for validation
+max_test_samples: null    # Samples per client for testing
 
 # Generation parameters
 num_beams: 4

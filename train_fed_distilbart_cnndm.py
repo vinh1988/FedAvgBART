@@ -3,14 +3,26 @@ import sys
 import torch
 import numpy as np
 import pandas as pd
+import csv
 from tqdm import tqdm
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, Dataset
+from torch.nn.utils.rnn import pad_sequence
 from torch.optim import AdamW
+from transformers import get_linear_schedule_with_warmup
 from torch.nn.utils import clip_grad_norm_
 from rouge_score import rouge_scorer
 from datetime import datetime
 import yaml
 import argparse
+import json
+from collections import defaultdict
+import copy
+import torch.nn.functional as F
+
+# Add src to path for local imports
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+from src.utils.fed_metrics import ClientContributionTracker
 
 # Add parent directory to path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -50,9 +62,9 @@ def load_config(config_path=None):
         'train_split': 'train',
         'val_split': 'validation',
         'test_split': 'test',
-        'max_train_samples': None,  # Set to None to use full dataset
-        'max_val_samples': None,    # Set to None to use full dataset
-        'max_test_samples': None,   # Set to None to use full dataset
+        'max_train_samples': 20,  # Set to None to use full dataset
+        'max_val_samples': 10,    # Set to None to use full dataset
+        'max_test_samples': 10,   # Set to None to use full dataset
         
         # Output settings
         'output_dir': './results/fed_distilbart_cnndm',
@@ -119,75 +131,293 @@ def load_config(config_path=None):
 
 def calculate_rouge_metrics(predictions, references):
     """Calculate ROUGE metrics for a list of predictions and references."""
-    # Initialize ROUGE scorer
-    rouge = rouge_scorer.RougeScorer(['rougeL'], use_stemmer=True)
-    
-    # Calculate ROUGE scores for each prediction-reference pair
-    rouge_scores = []
-    for pred, ref in zip(predictions, references):
-        if not isinstance(pred, str):
-            pred = ' '.join(pred) if isinstance(pred, list) else str(pred)
-        if not isinstance(ref, str):
-            ref = ' '.join(ref) if isinstance(ref, list) else str(ref)
-        
-        if pred.strip() and ref.strip():  # Only score non-empty strings
-            scores = rouge.score(ref, pred)
-            rouge_scores.append(scores['rougeL'])
-    
-    if not rouge_scores:
-        return {'precision': 0.0, 'recall': 0.0, 'f1': 0.0}
-    
-    # Calculate average scores
-    avg_precision = sum(s.precision for s in rouge_scores) / len(rouge_scores)
-    avg_recall = sum(s.recall for s in rouge_scores) / len(rouge_scores)
-    avg_f1 = sum(s.fmeasure for s in rouge_scores) / len(rouge_scores)
-    
-    return {
-        'precision': avg_precision,
-        'recall': avg_recall,
-        'f1': avg_f1
+    # Initialize default return values
+    default_scores = {
+        'rouge1': 0.0,
+        'rouge2': 0.0,
+        'rougeL': 0.0,
+        'precision': 0.0,
+        'recall': 0.0,
+        'f1': 0.0
     }
+    
+    # Initialize ROUGE scorer
+    try:
+        scorer = rouge_scorer.RougeScorer(['rouge1', 'rouge2', 'rougeL'], use_stemmer=True)
+        
+        # Calculate ROUGE scores for each prediction-reference pair
+        scores = []
+        for pred, ref in zip(predictions, references):
+            if pred and ref:  # Only calculate if both prediction and reference are non-empty
+                scores.append(scorer.score(ref, pred))
+        
+        if not scores:
+            return default_scores
+        
+        # Calculate average F1 scores for each ROUGE metric
+        avg_rouge1 = sum(s['rouge1'].fmeasure for s in scores) / len(scores)
+        avg_rouge2 = sum(s['rouge2'].fmeasure for s in scores) / len(scores)
+        avg_rougeL = sum(s['rougeL'].fmeasure for s in scores) / len(scores)
+        
+        return {
+            'rouge1': avg_rouge1,
+            'rouge2': avg_rouge2,
+            'rougeL': avg_rougeL,
+            'precision': avg_rougeL,  # For backward compatibility
+            'recall': avg_rougeL,     # For backward compatibility
+            'f1': avg_rougeL          # For backward compatibility
+        }
+        
+    except Exception as e:
+        print(f"Error calculating ROUGE metrics: {e}")
+        return default_scores
 
 def init_metrics_logger(output_dir, experiment_name):
     """
-    Initialize CSV file for logging federated training metrics.
+    Initialize metrics logger with consistent CSV format.
     
     Args:
-        output_dir (str): Directory to save the metrics file
-        experiment_name (str): Name of the experiment for the metrics file
+        output_dir (str): Directory to save metrics
+        experiment_name (str): Name of the experiment
         
     Returns:
-        str: Path to the created metrics file
+        str: Path to the metrics file
     """
     os.makedirs(output_dir, exist_ok=True)
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
     metrics_file = os.path.join(output_dir, f"{experiment_name}_metrics_{timestamp}.csv")
     
-    # Write header with additional metadata
-    with open(metrics_file, 'w') as f:
-        f.write("# Federated DistilBART Training Metrics - CNN/DailyMail\n")
-        f.write("# Generated at: {}\n".format(datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
-        f.write("# Model: distilbart-cnn-12-6\n")
-        f.write("# Task: Text Generation (Summarization)\n")
-        f.write("round,client_id,epoch,phase,loss,accuracy,precision,recall,f1\n")
+    # Define the expected columns in order
+    fieldnames = [
+        'round', 'client_id', 'epoch', 'phase', 
+        'loss', 'rouge1', 'rouge2', 'rougeL'
+    ]
+    
+    # Write header if file doesn't exist
+    if not os.path.exists(metrics_file):
+        try:
+            with open(metrics_file, 'w', newline='', encoding='utf-8') as f:
+                writer = csv.DictWriter(f, fieldnames=fieldnames)
+                writer.writeheader()
+            print(f"Initialized metrics file: {metrics_file}")
+        except Exception as e:
+            print(f"Error initializing metrics file: {e}")
+            # Try with a different name if needed
+            metrics_file = os.path.join(output_dir, f"{experiment_name}_metrics_{timestamp}_new.csv")
+            with open(metrics_file, 'w', newline='', encoding='utf-8') as f:
+                writer = csv.DictWriter(f, fieldnames=fieldnames)
+                writer.writeheader()
+            print(f"Created new metrics file: {metrics_file}")
     
     print(f"Metrics will be logged to: {metrics_file}")
     return metrics_file
 
-def log_metrics(metrics_file, metrics):
-    """Log metrics to CSV file."""
-    with open(metrics_file, 'a') as f:
-        f.write(','.join([
-            str(metrics.get('round', '')),
-            str(metrics.get('client_id', '')),
-            str(metrics.get('epoch', '')),
-            str(metrics.get('phase', '')),
-            f"{metrics.get('loss', 0.0):.4f}",
-            f"{metrics.get('accuracy', 0.0):.4f}",
-            f"{metrics.get('precision', 0.0):.4f}",
-            f"{metrics.get('recall', 0.0):.4f}",
-            f"{metrics.get('f1', 0.0):.4f}"
-        ]) + '\n')
+def log_metrics(metrics_file, metrics_dict):
+    """
+    Log metrics to a CSV file with consistent formatting.
+    
+    Args:
+        metrics_file (str): Path to the metrics CSV file
+        metrics_dict (dict): Dictionary containing metrics to log
+    """
+    # Ensure all required fields are present with default values
+    default_metrics = {
+        'round': 0,
+        'phase': '',
+        'epoch': 0,
+        'client_id': -1,
+        'loss': 0.0,
+        'rouge1': 0.0,
+        'rouge2': 0.0,
+        'rougeL': 0.0,
+        'gini_coefficient': 0.0,
+        'mean_contribution': 0.0,
+        'min_contribution': 0.0,
+        'max_contribution': 0.0,
+        'cv_contribution': 0.0
+    }
+    
+    # Update with provided metrics
+    default_metrics.update(metrics_dict)
+    
+    # Convert all values to strings and format floats
+    formatted_metrics = {}
+    for key, value in default_metrics.items():
+        if isinstance(value, float):
+            formatted_metrics[key] = f"{value:.6f}"
+        elif value is None:
+            formatted_metrics[key] = ''
+        else:
+            formatted_metrics[key] = str(value)
+    
+    # Ensure directory exists
+    os.makedirs(os.path.dirname(os.path.abspath(metrics_file)), exist_ok=True)
+    
+    # Write to CSV
+    file_exists = os.path.isfile(metrics_file)
+    with open(metrics_file, 'a', newline='') as f:
+        writer = csv.DictWriter(f, fieldnames=formatted_metrics.keys())
+        if not file_exists:
+            writer.writeheader()
+        writer.writerow(formatted_metrics)
+
+def init_contribution_tracker(output_dir):
+    """Initialize client contribution tracker."""
+    contribution_file = os.path.join(output_dir, 'client_contributions.csv')
+    
+    # Create header if file doesn't exist
+    if not os.path.exists(contribution_file):
+        with open(contribution_file, 'w') as f:
+            f.write('round,client_id,contribution,data_size,avg_gradient_norm,update_norm\n')
+    
+    return contribution_file
+
+def log_client_contribution(contribution_file, round_num, client_id, contribution, data_size, avg_grad_norm, update_norm):
+    """Log client contribution metrics to CSV."""
+    with open(contribution_file, 'a') as f:
+        f.write(f'{round_num},{client_id},{contribution:.6f},{data_size},{avg_grad_norm:.6f},{update_norm:.6f}\n')
+
+def calculate_contribution(initial_weights, updated_weights, global_weights, data_size):
+    """
+    Calculate client's contribution based on weight updates and data size.
+    
+    Args:
+        initial_weights: Client's model weights before local training
+        updated_weights: Client's model weights after local training
+        global_weights: Global model weights before aggregation
+        data_size: Number of training samples for this client
+        
+    Returns:
+        tuple: (contribution_score, avg_grad_norm, update_norm)
+    """
+    # Calculate weight update
+    update = {}
+    for key in initial_weights:
+        update[key] = updated_weights[key] - initial_weights[key]
+    
+    # Calculate L2 norm of the update
+    update_norm = 0.0
+    for key in update:
+        update_norm += torch.norm(update[key].float()).item() ** 2
+    update_norm = np.sqrt(update_norm)
+    
+    # Calculate average gradient norm (approximate as update / learning_rate)
+    # This is an approximation since we don't have the actual gradients
+    learning_rate = 5e-5  # Should match your learning rate
+    avg_grad_norm = update_norm / learning_rate if learning_rate > 0 else 0.0
+    
+    # Simple contribution score: update norm weighted by data size
+    # You can modify this formula based on your specific needs
+    contribution_score = update_norm * np.sqrt(data_size)
+    
+    return contribution_score, avg_grad_norm, update_norm
+
+def save_client_distribution(clients_data, output_dir):
+    """Save client data distribution to a CSV file."""
+    os.makedirs(output_dir, exist_ok=True)
+    dist_file = os.path.join(output_dir, 'client_data_distribution.csv')
+    
+    # Convert to DataFrame
+    dist_data = []
+    
+    def get_avg_text_length(dataset, text_key='article'):
+        """Helper to get average text length from dataset."""
+        if dataset is None or not hasattr(dataset, '__len__') or len(dataset) == 0:
+            return 0
+            
+        try:
+            # Handle different dataset formats
+            if hasattr(dataset, 'dataset') and hasattr(dataset, 'indices'):
+                # Handle Subset objects
+                items = []
+                for i in dataset.indices:
+                    try:
+                        item = dataset.dataset[i]
+                        if isinstance(item, dict):
+                            items.append(item)
+                        elif hasattr(item, 'article') and hasattr(item, 'highlights'):
+                            items.append({
+                                'article': item.article,
+                                'highlights': item.highlights
+                            })
+                    except Exception as e:
+                        print(f"Error accessing dataset item {i}: {e}")
+                        continue
+            elif isinstance(dataset, list):
+                items = dataset
+            else:
+                items = dataset
+                
+            # Extract text
+            texts = []
+            for item in items:
+                try:
+                    if isinstance(item, dict):
+                        if text_key in item:
+                            texts.append(str(item[text_key]))
+                    elif hasattr(item, text_key):
+                        texts.append(str(getattr(item, text_key)))
+                except (KeyError, AttributeError, IndexError) as e:
+                    print(f"Error processing item: {e}")
+                    continue
+                    
+            lengths = [len(t.split()) for t in texts if t]
+            return np.mean(lengths) if lengths else 0
+            
+        except Exception as e:
+            print(f"Error calculating text length: {e}")
+            import traceback
+            traceback.print_exc()
+            return 0
+    
+    for client_id, data in clients_data.items():
+        try:
+            train_samples = len(data['train']) if hasattr(data['train'], '__len__') else 0
+            val_samples = len(data['val']) if hasattr(data['val'], '__len__') else 0
+            test_samples = len(data['test']) if hasattr(data['test'], '__len__') else 0
+            
+            dist_data.append({
+                'client_id': client_id,
+                'train_samples': train_samples,
+                'val_samples': val_samples,
+                'test_samples': test_samples,
+                'avg_train_length': get_avg_text_length(data['train']),
+                'avg_val_length': get_avg_text_length(data['val']),
+                'avg_test_length': get_avg_text_length(data['test'], 'highlights')
+            })
+        except Exception as e:
+            print(f"Error processing client {client_id}: {e}")
+            dist_data.append({
+                'client_id': client_id,
+                'train_samples': 0,
+                'val_samples': 0,
+                'test_samples': 0,
+                'avg_train_length': 0,
+                'avg_val_length': 0,
+                'avg_test_length': 0
+            })
+    
+    # Save to CSV
+    df = pd.DataFrame(dist_data)
+    df.to_csv(dist_file, index=False)
+    print(f"Client data distribution saved to {dist_file}")
+    
+    # Save a summary
+    summary_file = os.path.join(output_dir, 'data_distribution_summary.txt')
+    with open(summary_file, 'w') as f:
+        f.write("=== Data Distribution Summary ===\n\n")
+        f.write("Number of clients: {}\n\n".format(len(clients_data)))
+        
+        f.write("Samples per client:\n")
+        f.write(df[['client_id', 'train_samples', 'val_samples', 'test_samples']].to_string(index=False))
+        f.write("\n\n")
+        
+        f.write("Average text length per client:\n")
+        f.write(df[['client_id', 'avg_train_length', 'avg_val_length', 'avg_test_length']].to_string(index=False))
+        f.write("\n")
+    
+    print(f"Data distribution summary saved to {summary_file}")
+    return dist_file
 
 def train(config_path=None):
     # Load configuration
@@ -206,22 +436,63 @@ def train(config_path=None):
         output_dir=config['output_dir'],
         experiment_name=config['experiment_name']
     )
+    
+    # Initialize contribution tracker
+    contribution_tracker = ClientContributionTracker(
+        num_clients=config['num_clients'],
+        output_dir=os.path.join(config['output_dir'], 'client_contributions')
+    )
     print(f"Model checkpoints will be saved to: {config['model_save_path']}")
+    print(f"Client contributions will be logged to: {contribution_tracker.output_dir}")
     
     # Set device
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"Using device: {device}")
     
-    # Load full dataset
-    print("Loading full CNN/DailyMail dataset...")
-    train_datasets, test_datasets, tokenizer = load_cnndm(
+    # Load dataset with correct sample sizes
+    print("Loading CNN/DailyMail dataset...")
+    train_datasets, val_datasets, test_datasets, tokenizer = load_cnndm(
         data_dir=config['data_dir'], 
         num_clients=config['num_clients'], 
         test_size=0.1, 
         random_state=config['seed'],
-        max_train_samples=config['max_train_samples'] * config['num_clients'] if config['max_train_samples'] else None,
-        max_test_samples=config['max_test_samples'] * config['num_clients'] if config['max_test_samples'] else None
+        max_train_samples=config['max_train_samples'],
+        max_val_samples=config.get('max_val_samples', None),
+        max_test_samples=config['max_test_samples']
     )
+    
+    # Save client data distribution
+    client_data = {}
+    for client_id in range(len(train_datasets)):
+        try:
+            # Get training data
+            train_ds = train_datasets[client_id]
+            val_ds = val_datasets[client_id] if val_datasets and client_id < len(val_datasets) else None
+            test_ds = test_datasets[client_id] if test_datasets and client_id < len(test_datasets) else None
+            
+            def get_data(dataset):
+                if dataset is None:
+                    return []
+                if hasattr(dataset, 'dataset') and hasattr(dataset.dataset, 'data'):
+                    return dataset.dataset.data
+                elif hasattr(dataset, 'dataset'):
+                    return dataset.dataset
+                return dataset
+            
+            client_data[client_id] = {
+                'train': get_data(train_ds),
+                'val': get_data(val_ds) if val_ds is not None else [],
+                'test': get_data(test_ds) if test_ds is not None else []
+            }
+            
+        except Exception as e:
+            print(f"Error getting data for client {client_id}: {e}")
+            import traceback
+            traceback.print_exc()
+            client_data[client_id] = {'train': [], 'val': [], 'test': []}
+    
+    # Save distribution information
+    save_client_distribution(client_data, config['output_dir'])
     
     # Print dataset statistics
     total_train_samples = sum(len(ds) for ds in train_datasets)
@@ -252,13 +523,17 @@ def train(config_path=None):
         # Client update phase
         client_models = []
         client_sizes = []
+        client_updates = []
+        client_ids = []
+        client_data_sizes = []
 
         for client_idx in selected_clients:
             print(f"\nTraining client {client_idx}...")
 
-            # Create local model copy
+            # Create local model copy and save initial weights
             local_model = DistilBARTGen(use_pt_model=True).to(device)
             local_model.load_state_dict(model.state_dict())
+            initial_weights = copy.deepcopy(local_model.state_dict())
 
             # Get client data with reduced num_workers and pin_memory=False to save memory
             train_loader = DataLoader(
@@ -310,15 +585,55 @@ def train(config_path=None):
                     'epoch': epoch + 1,
                     'phase': 'train',
                     'loss': avg_loss,
-                    'accuracy': 0.0,  # Not applicable for generation
-                    'precision': 0.0,  # Will be updated during evaluation
-                    'recall': 0.0,     # Will be updated during evaluation
-                    'f1': 0.0          # Will be updated during evaluation
+                    'rouge1': 0.0,     # Will be updated during evaluation
+                    'rouge2': 0.0,     # Will be updated during evaluation
+                    'rougeL': 0.0      # Will be updated during evaluation
                 })
             
-            # Store updated model and data size
-            client_models.append(local_model.state_dict())
-            client_sizes.append(len(train_datasets[client_idx]))
+            # Calculate client update and store model
+            updated_weights = local_model.state_dict()
+            client_update = {}
+            for key in initial_weights:
+                client_update[key] = updated_weights[key] - initial_weights[key]
+            
+            data_size = len(train_datasets[client_idx])
+            
+            # Store client update and data size for aggregation
+            client_updates.append(client_update)
+            client_ids.append(client_idx)
+            client_data_sizes.append(data_size)
+            
+            # Store the full model for aggregation
+            client_models.append(updated_weights)
+            client_sizes.append(data_size)
+            
+            print(f"Client {client_idx} - Data Size: {data_size}")
+        
+        # Log round metrics for all participating clients
+        round_metrics = contribution_tracker.log_round(
+            round_num=round_num,
+            client_updates=client_updates,
+            client_sizes=client_data_sizes,
+            client_ids=client_ids
+        )
+        
+        if round_metrics:
+            print(f"\nRound {round_num} Contribution Metrics:")
+            print(f"  Gini Coefficient: {round_metrics['gini']:.4f}")
+            print(f"  Mean Contribution: {round_metrics['mean_contribution']:.4f}")
+            print(f"  Min/Max Contribution: {round_metrics['min_contribution']:.4f}/{round_metrics['max_contribution']:.4f}")
+            print(f"  Coefficient of Variation: {round_metrics['cv_contribution']:.4f}")
+            
+            # Log to metrics file
+            log_metrics(metrics_file, {
+                'round': round_num,
+                'phase': 'aggregation',
+                'gini_coefficient': round_metrics['gini'],
+                'mean_contribution': round_metrics['mean_contribution'],
+                'min_contribution': round_metrics['min_contribution'],
+                'max_contribution': round_metrics['max_contribution'],
+                'cv_contribution': round_metrics['cv_contribution']
+            })
         
         # Aggregate model updates (Federated Averaging)
         print("\nAggregating model updates...")
@@ -417,17 +732,16 @@ def train(config_path=None):
             print(f"References sample: {all_references[:1] if all_references else 'None'}")
             rouge_metrics = {'precision': 0.0, 'recall': 0.0, 'f1': 0.0}
         
-        # Log evaluation metrics
+        # Log evaluation metrics with default values if ROUGE metrics are not available
         log_metrics(metrics_file, {
             'round': round_num,
             'client_id': 'global',
             'epoch': config['local_epochs'],
             'phase': 'eval',
             'loss': avg_loss,
-            'accuracy': 0.0,  # Not applicable for generation
-            'precision': rouge_metrics['precision'] * 100,  # Convert to percentage
-            'recall': rouge_metrics['recall'] * 100,
-            'f1': rouge_metrics['f1'] * 100
+            'rouge1': rouge_metrics.get('rouge1', 0.0),
+            'rouge2': rouge_metrics.get('rouge2', 0.0),
+            'rougeL': rouge_metrics.get('rougeL', 0.0)
         })
         
         print(f"\nEvaluation Metrics - Loss: {avg_loss:.4f}, "
@@ -442,7 +756,9 @@ def train(config_path=None):
             'tokenizer': tokenizer,
             'metrics': {
                 'loss': avg_loss,
-                **rouge_metrics
+                'rouge1': rouge_metrics.get('rouge1', 0.0),
+                'rouge2': rouge_metrics.get('rouge2', 0.0),
+                'rougeL': rouge_metrics.get('rougeL', 0.0)
             }
         }, checkpoint_path)
         
@@ -450,6 +766,47 @@ def train(config_path=None):
         
         # Set back to training mode
         model.train()
+    
+    # Training complete - save final model and generate contribution summary
+    final_model_path = os.path.join(config['model_save_path'], 'final_model.pt')
+    torch.save({
+        'model_state_dict': model.state_dict(),
+        'tokenizer': tokenizer,
+        'config': config
+    }, final_model_path)
+    
+    # Generate and save final contribution summary
+    summary = contribution_tracker.generate_summary()
+    
+    # Ensure all metrics are saved to disk
+    contribution_tracker.save_metrics()
+    
+    print("\n" + "="*50)
+    print("Client Contribution Summary:")
+    print("="*50)
+    print(f"  Overall Gini Coefficient: {summary['inequality']['gini']:.4f}")
+    print(f"  Overall Coefficient of Variation: {summary['inequality']['cv']:.4f}")
+    
+    print("\nParticipation Counts:")
+    for client_id, count in sorted(summary['participation'].items(), key=lambda x: x[1], reverse=True):
+        print(f"  Client {client_id}: {count} rounds")
+    
+    print("\nTotal Contributions:")
+    for client_id, contrib in sorted(summary['total_contributions'].items(), 
+                                   key=lambda x: x[1], reverse=True):
+        print(f"  Client {client_id}: {contrib:.4f}")
+    
+    print("\n" + "="*50)
+    print(f"\nTraining complete! Final model saved to {final_model_path}")
+    print(f"Client contribution analysis saved to: {contribution_tracker.output_dir}")
+    
+    # Generate visualizations
+    try:
+        from src.visualization.visualize_contributions import plot_contribution_metrics
+        plot_contribution_metrics(contribution_tracker.output_dir)
+        print(f"Visualizations saved to: {os.path.join(contribution_tracker.output_dir, 'contribution_plots')}")
+    except Exception as e:
+        print(f"Error generating visualizations: {e}")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Train DistilBART on CNN/DailyMail with Federated Learning')
