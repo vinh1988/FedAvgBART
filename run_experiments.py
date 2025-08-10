@@ -34,7 +34,7 @@ def run_experiment(config_path, num_clients, output_dir, num_rounds=5):
         yaml.dump(config, f)
     
     # Run training
-    cmd = f"python train_fed_distilbart_cnndm.py --config {exp_config_path}"
+    cmd = f"python train_fed_bart_cnndm.py --config {exp_config_path}"
     subprocess.run(cmd, shell=True, check=True)
     
     return exp_output_dir

@@ -1,5 +1,5 @@
 
-# Federated Learning for Text Summarization with DistilBART
+# Federated Learning for Text Summarization with BART
 
 This repository contains an implementation of Federated Learning with DistilBART for abstractive text summarization on the CNN/DailyMail dataset. The implementation supports federated training of sequence-to-sequence models with non-IID data distribution across clients, along with comprehensive visualization and analysis tools.
 
@@ -14,7 +14,7 @@ This repository contains an implementation of Federated Learning with DistilBART
 | 5       | 35.87   | 14.24   | 26.05   |
 
 ### Model Configuration
-- **Base Model**: DistilBART (facebook/bart-large-cnn)
+- **Base Model**: BART (facebook/bart-base)
 - **Federated Learning**: FedAvg with weighted aggregation
 - **Client Selection**: Random sampling per round
 - **Evaluation**: Performed on a held-out test set
@@ -27,7 +27,7 @@ This repository contains an implementation of Federated Learning with DistilBART
 
 ## ✨ Features
 
-- **Federated Learning** with DistilBART (distilled version of BART)
+- **Federated Learning** with BART (Bidirectional and Auto-Regressive Transformers)
 - **Multi-client Training** with configurable client counts and participation rates
 - **Comprehensive Metrics**:
   - ROUGE scores (ROUGE-1, ROUGE-2, ROUGE-L)
@@ -81,8 +81,8 @@ pip install -r requirements.txt
 To train with a specific number of clients:
 
 ```bash
-python train_fed_distilbart_cnndm.py \
-    --config configs/distilbart_cnndm.yaml \
+python train_fed_bart_cnndm.py \
+    --config configs/bart_cnndm.yaml \
     --num_clients 5 \
     --num_rounds 10 \
     --output_dir experiment_results/clients_5
@@ -92,8 +92,7 @@ python train_fed_distilbart_cnndm.py \
 To run experiments with different numbers of clients (2-10):
 
 ```bash
-python run_experiments.py \
-    --config configs/distilbart_cnndm.yaml \
+python run_experiments.py --config configs/bart_cnndm.yaml \
     --min-clients 2 \
     --max-clients 10 \
     --num-rounds 10
@@ -186,7 +185,7 @@ python -m src.visualization.analyze_config_performance \
 
 ## 🛠️ Configuration Options
 
-Key parameters in `configs/distilbart_cnndm.yaml`:
+Key parameters in `configs/bart_cnndm.yaml`:
 
 ```yaml
 data:
@@ -242,7 +241,7 @@ evaluation:
    - Balanced Gini coefficient (closer to 0) indicates fair client participation
    - High CV might suggest some clients are contributing more than others
 
-Edit `configs/distilbart_cnndm.yaml` to customize:
+Edit `configs/bart_cnndm.yaml` to customize:
 
 ```yaml
 training:
@@ -295,12 +294,12 @@ data:
 ## 🔍 Implementation Details
 
 ### Model Architecture
-- Based on DistilBART (distilled version of BART) from Hugging Face
+- Based on BART (Bidirectional and Auto-Regressive Transformers) from Hugging Face
 - Sequence-to-sequence model for abstractive summarization
 - Tokenizer: BART tokenizer with a maximum sequence length of 1024 tokens
 
 ### Training Process
-1. The global model is initialized with pre-trained DistilBART weights
+1. The global model is initialized with pre-trained BART weights
 2. In each federated round:
    - 5 out of 10 clients are randomly selected (50% participation rate)
    - Each client trains the model on its local data for 1 epoch
@@ -327,11 +326,11 @@ The implementation includes several memory optimization techniques:
 
 ## Federated Learning for Text Summarization
 
-This repository contains an implementation of Federated Learning with DistilBART for abstractive text summarization on the CNN/DailyMail dataset. The implementation supports federated training of sequence-to-sequence models with non-IID data distribution across clients.
+This repository contains an implementation of Federated Learning with BART for abstractive text summarization on the CNN/DailyMail dataset. The implementation supports federated training of sequence-to-sequence models with non-IID data distribution across clients.
 
 ### Features
 
-- Federated Learning with DistilBART
+- Federated Learning with BART
 - Support for non-IID data partitioning
 - Configurable number of clients and federated learning rounds
 - Evaluation using ROUGE metrics
@@ -363,8 +362,8 @@ This repository contains an implementation of Federated Learning with DistilBART
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/yourusername/fed-distilbart-cnndm.git
-cd fed-distilbart-cnndm
+git clone https://github.com/yourusername/fed-bart-cnndm.git
+cd fed-bart-cnndm
 ```
 
 2. Install the required packages:
@@ -376,7 +375,7 @@ pip install -r requirements.txt
 
 #### Training
 
-To train the federated DistilBART model on the CNN/DailyMail dataset:
+To train the federated BART model on the CNN/DailyMail dataset:
 
 #### Arguments
 
@@ -434,8 +433,8 @@ To train the federated DistilBART model on the CNN/DailyMail dataset:
 ### Installation
 1. Clone the repository:
    ```bash
-   git clone https://github.com/yourusername/fed-distilbart-cnndm.git
-   cd fed-distilbart-cnndm
+   git clone https://github.com/yourusername/fed-bart-cnndm.git
+   cd fed-bart-cnndm
    ```
 
 2. Install the required packages:
@@ -445,7 +444,7 @@ To train the federated DistilBART model on the CNN/DailyMail dataset:
 
 ## Configuration
 
-Edit the `configs/distilbart_cnndm.yaml` file to adjust training parameters such as:
+Edit the `configs/bart_cnndm.yaml` file to adjust training parameters such as:
 - Number of clients
 - Clients per round
 - Batch size
@@ -457,10 +456,10 @@ Edit the `configs/distilbart_cnndm.yaml` file to adjust training parameters such
 
 ### Training
 
-To train the federated DistilBART model on the CNN/DailyMail dataset:
+To train the federated BART model on the CNN/DailyMail dataset:
 
 ```bash
-python train_distilbart_cnndm.py \
+python train_fed_bart_cnndm.py \
     --num_clients 3 \
     --num_rounds 1 \
     --epochs_per_client 1 \
@@ -468,19 +467,19 @@ python train_distilbart_cnndm.py \
     --learning_rate 5e-5 \
     --max_grad_norm 1.0 \
     --data_dir "./data/cnndm" \
-    --model_save_path "./saved_models/distilbart_cnndm"
+    --model_save_path "./saved_models/bart_cnndm"
 ```
 
 ### Visualization
 To visualize training metrics:
 ```bash
-python visualize_fed_distilbart_cnndm.py --results-dir ./results_distilbart_cnndm_federated
+python visualize_fed_bart_cnndm.py --results-dir ./results_bart_cnndm_federated
 ```
 
 ### Using Configuration File
 Alternatively, you can use a YAML configuration file:
 ```bash
-python train_distilbart_cnndm.py --config configs/distilbart_cnndm.yaml
+python train_fed_bart_cnndm.py --config configs/bart_cnndm.yaml
 ```
 
 ## Performance Optimization

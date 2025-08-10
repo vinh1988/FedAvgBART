@@ -2,11 +2,15 @@ import torch
 import torch.nn as nn
 from transformers import BartForConditionalGeneration, BartConfig
 
-class DistilBARTGen(nn.Module):
+class BARTGen(nn.Module):
+    """
+    BART model for conditional text generation.
+    This is a wrapper around the Hugging Face BART implementation.
+    """
     def __init__(self, num_encoder_layers=6, num_decoder_layers=6, d_model=768, 
                  nhead=12, dim_feedforward=3072, dropout=0.1, 
                  max_length=1024, vocab_size=50265, use_pt_model=True):
-        super(DistilBARTGen, self).__init__()
+        super(BARTGen, self).__init__()
         
         self.use_pt_model = use_pt_model
         

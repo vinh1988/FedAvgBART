@@ -29,7 +29,7 @@ from fed_metrics_tracker import MetricsTracker
 # Add parent directory to path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from src.models.distilbart_gen import DistilBARTGen
+from src.models.bart_gen import BARTGen
 from src.datasets.cnndm import load_cnndm
 
 def load_config(config_path=None):
@@ -487,7 +487,7 @@ def train(config_path=None):
     
     # Initialize global model
     print("Initializing DistilBART model...")
-    model = DistilBARTGen(use_pt_model=True).to(device)
+    model = BARTGen(use_pt_model=True).to(device)
     
     # Federated training loop
     print("Starting federated training...")
@@ -512,7 +512,7 @@ def train(config_path=None):
             print(f"\nTraining client {client_idx}...")
 
             # Create local model copy and save initial weights
-            local_model = DistilBARTGen(use_pt_model=True).to(device)
+            local_model = BARTGen(use_pt_model=True).to(device)
             local_model.load_state_dict(model.state_dict())
             initial_weights = copy.deepcopy(local_model.state_dict())
 
