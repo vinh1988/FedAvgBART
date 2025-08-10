@@ -38,6 +38,7 @@ This repository contains an implementation of Federated Learning with DistilBART
   - Client contribution heatmaps
   - ROUGE score trends
   - Data distribution analysis
+  - **Configuration Analysis**: Comprehensive comparison of different client configurations
 - **Efficient Training**:
   - Gradient accumulation
   - Mixed precision training
@@ -72,33 +73,174 @@ cd fed-distilbart-cnndm
 pip install -r requirements.txt
 ```
 
-## 🚀 Training and Evaluation
+## 🚀 Experiment Workflow
 
-### 1. Run Federated Training
+### 1. Running Federated Learning Experiments
 
-To train the federated DistilBART model with different numbers of clients:
-
-```bash
-# For a single client configuration
-python train_fed_distilbart_cnndm.py --config configs/distilbart_cnndm.yaml --num_clients 5
-
-# Or use the experiment runner for multiple client configurations
-python run_experiments.py --config configs/distilbart_cnndm.yaml --min-clients 2 --max-clients 10 --num-rounds 13
-```
-
-### 2. Analyze Results
-
-After training, generate visualizations and analysis:
+#### Single Configuration
+To train with a specific number of clients:
 
 ```bash
-# Generate performance comparison and contribution analysis
-python run_experiments.py --skip-training --min-clients 2 --max-clients 5
-
-# Or generate specific visualizations
-python -m src.visualization.visualize_contributions --results-dir experiment_results
+python train_fed_distilbart_cnndm.py \
+    --config configs/distilbart_cnndm.yaml \
+    --num_clients 5 \
+    --num_rounds 10 \
+    --output_dir experiment_results/clients_5
 ```
 
-### 3. Key Configuration Options
+#### Multiple Configurations
+To run experiments with different numbers of clients (2-10):
+
+```bash
+python run_experiments.py \
+    --config configs/distilbart_cnndm.yaml \
+    --min-clients 2 \
+    --max-clients 10 \
+    --num-rounds 10
+```
+
+### 2. Collecting and Consolidating Metrics
+
+After running experiments, consolidate metrics from all client configurations:
+
+```bash
+python -m src.analysis.collect_metrics \
+    --base-dir ./experiment_results \
+    --output-file ./experiment_results/analysis/consolidated_metrics.csv \
+    --min-clients 2 \
+    --max-clients 10
+```
+
+### 3. Generating Visualizations
+
+Generate comprehensive visualizations from the consolidated metrics:
+
+```bash
+python -m src.visualization.visualize_consolidated_metrics \
+    --metrics-file ./experiment_results/analysis/consolidated_metrics.csv \
+    --output-dir ./experiment_results/analysis/plots
+```
+
+### 4. Analyzing Configuration Performance
+
+To compare different client configurations and find the optimal setup:
+
+```bash
+python -m src.visualization.analyze_config_performance \
+    --metrics-file ./experiment_results/analysis/consolidated_metrics.csv \
+    --output-dir ./experiment_results/analysis/plots
+```
+
+**Outputs**:
+- `config_performance_comparison.png`: Comprehensive visualization of all metrics across configurations
+  - ROUGE and BLEU scores by client count
+  - Training loss and BERTScore comparisons
+  - Client contribution metrics (Gini coefficient, CV)
+  - Client participation statistics
+
+### 5. Understanding the Outputs
+
+#### Generated Files
+- `consolidated_metrics.csv`: All metrics in a single CSV file
+- `plots/rouge_metrics.png`: ROUGE scores across client configurations
+- `plots/bleu_metrics.png`: BLEU scores across client configurations
+- `plots/bertscore_and_loss.png`: BERTScore and training loss
+- `plots/contribution_metrics.png`: Client contribution analysis
+- `plots/config_performance_comparison.png`: Comprehensive configuration comparison
+- `plots/metrics_summary.csv`: Tabular summary of all metrics
+
+## 📊 Metrics Explanation
+
+### Text Generation Metrics
+
+#### ROUGE (Recall-Oriented Understudy for Gisting Evaluation)
+- **ROUGE-1**: Measures unigram (single word) overlap between generated and reference summaries
+- **ROUGE-2**: Measures bigram overlap between generated and reference summaries
+- **ROUGE-L**: Measures the longest common subsequence between generated and reference summaries
+  - Higher ROUGE scores (0-100 scale) indicate better summary quality
+
+#### BLEU (Bilingual Evaluation Understudy)
+- **BLEU-1 to BLEU-4**: Measures n-gram precision between generated and reference summaries
+  - BLEU-1: Unigram precision
+  - BLEU-2: Bigram precision
+  - BLEU-3: Trigram precision
+  - BLEU-4: 4-gram precision
+  - Higher BLEU scores (0-100 scale) indicate better n-gram matching
+
+#### BERTScore
+- **BERTScore F1**: Measures semantic similarity between generated and reference texts using contextual embeddings
+  - Values closer to 100 indicate better semantic similarity
+  - More robust to paraphrasing than n-gram based metrics
+
+### Training Metrics
+- **Loss**: Cross-entropy loss during training
+  - Lower values indicate better model fitting
+  - Should generally decrease and stabilize over training rounds
+
+### Federated Learning Metrics
+- **Gini Coefficient**: Measures inequality in client contributions
+  - 0 = perfect equality, 1 = maximum inequality
+- **CV (Coefficient of Variation)**: Measures relative variability in client contributions
+  - Lower values indicate more balanced participation
+- **Mean/Min/Max Contribution**: Statistics about client participation
+
+## 🛠️ Configuration Options
+
+Key parameters in `configs/distilbart_cnndm.yaml`:
+
+```yaml
+data:
+  dataset_name: "cnn_dailymail"
+  dataset_config: "3.0.0"
+  max_source_length: 1024
+  max_target_length: 142
+  
+model:
+  model_name: "facebook/bart-large-cnn"
+  learning_rate: 5e-5
+  weight_decay: 0.01
+  
+federated:
+  num_clients: 5
+  clients_per_round: 3
+  num_rounds: 10
+  
+training:
+  batch_size: 4
+  gradient_accumulation_steps: 4
+  num_train_epochs: 1
+  fp16: True
+  
+evaluation:
+  eval_batch_size: 4
+  max_eval_samples: 100
+```
+
+## 📈 Analysis and Interpretation
+
+### Configuration Analysis
+
+1. **Optimal Client Count**
+   - Run the configuration analysis tool to identify the best performing setup:
+   ```bash
+   python -m src.visualization.analyze_config_performance \
+       --metrics-file ./experiment_results/analysis/consolidated_metrics.csv \
+       --output-dir ./experiment_results/analysis/plots
+   ```
+   - Look for the "elbow point" in the performance curves where adding more clients yields diminishing returns
+   - Balance between model performance and computational resources
+
+2. **Performance Trends**
+   - Check if ROUGE-L and BERTScore improve with more clients
+   - Look for consistent patterns across different metrics
+
+2. **Model Stability**
+   - Consistent performance across different client counts indicates robust learning
+   - Large fluctuations in metrics might suggest unstable training
+
+3. **Client Contribution**
+   - Balanced Gini coefficient (closer to 0) indicates fair client participation
+   - High CV might suggest some clients are contributing more than others
 
 Edit `configs/distilbart_cnndm.yaml` to customize:
 

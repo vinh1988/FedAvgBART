@@ -20,9 +20,9 @@ train_split: "train"
 val_split: "validation"
 test_split: "test"
 # Dataset configuration
-max_train_samples: null  # Samples per client for training
-max_val_samples: null     # Samples per client for validation
-max_test_samples: null    # Samples per client for testing
+max_train_samples: 20  # Samples per client for training
+max_val_samples: 10     # Samples per client for validation
+max_test_samples: 10    # Samples per client for testing
 
 # Generation parameters
 num_beams: 4

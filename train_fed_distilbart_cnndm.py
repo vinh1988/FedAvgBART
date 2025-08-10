@@ -18,20 +18,19 @@ import json
 from collections import defaultdict
 import copy
 import torch.nn.functional as F
+import gc  # Garbage collection
 
 # Add src to path for local imports
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from src.utils.fed_metrics import ClientContributionTracker
+from fed_metrics_tracker import MetricsTracker
 
 # Add parent directory to path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from src.models.distilbart_gen import DistilBARTGen
 from src.datasets.cnndm import load_cnndm
-
-# Initialize ROUGE scorer
-rouge = rouge_scorer.RougeScorer(['rouge1', 'rouge2', 'rougeL'], use_stemmer=True)
 
 def load_config(config_path=None):
     """Load configuration from YAML file with defaults."""
@@ -175,46 +174,24 @@ def calculate_rouge_metrics(predictions, references):
 def init_metrics_logger(output_dir, experiment_name):
     """
     Initialize metrics logger with consistent CSV format.
+    This is kept for backward compatibility but is no longer used.
+    The new MetricsTracker class should be used instead.
     
     Args:
         output_dir (str): Directory to save metrics
         experiment_name (str): Name of the experiment
         
     Returns:
-        str: Path to the metrics file
+        str: Path to the metrics file (deprecated)
     """
-    os.makedirs(output_dir, exist_ok=True)
-    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-    metrics_file = os.path.join(output_dir, f"{experiment_name}_metrics_{timestamp}.csv")
-    
-    # Define the expected columns in order
-    fieldnames = [
-        'round', 'client_id', 'epoch', 'phase', 
-        'loss', 'rouge1', 'rouge2', 'rougeL'
-    ]
-    
-    # Write header if file doesn't exist
-    if not os.path.exists(metrics_file):
-        try:
-            with open(metrics_file, 'w', newline='', encoding='utf-8') as f:
-                writer = csv.DictWriter(f, fieldnames=fieldnames)
-                writer.writeheader()
-            print(f"Initialized metrics file: {metrics_file}")
-        except Exception as e:
-            print(f"Error initializing metrics file: {e}")
-            # Try with a different name if needed
-            metrics_file = os.path.join(output_dir, f"{experiment_name}_metrics_{timestamp}_new.csv")
-            with open(metrics_file, 'w', newline='', encoding='utf-8') as f:
-                writer = csv.DictWriter(f, fieldnames=fieldnames)
-                writer.writeheader()
-            print(f"Created new metrics file: {metrics_file}")
-    
-    print(f"Metrics will be logged to: {metrics_file}")
-    return metrics_file
+    print("Note: init_metrics_logger is deprecated. Using MetricsTracker instead.")
+    return os.path.join(output_dir, f"{experiment_name}_metrics_deprecated.csv")
 
 def log_metrics(metrics_file, metrics_dict):
     """
     Log metrics to a CSV file with consistent formatting.
+    This is kept for backward compatibility but is no longer used.
+    The new MetricsTracker class should be used instead.
     
     Args:
         metrics_file (str): Path to the metrics CSV file
@@ -431,10 +408,11 @@ def train(config_path=None):
         print(f"{key}: {value}")
     print("="*50 + "\n")
     
-    # Initialize metrics logging
-    metrics_file = init_metrics_logger(
+    # Initialize metrics tracking
+    metrics_tracker = MetricsTracker(
         output_dir=config['output_dir'],
-        experiment_name=config['experiment_name']
+        experiment_name=config['experiment_name'],
+        num_clients=config['num_clients']
     )
     
     # Initialize contribution tracker
@@ -442,6 +420,9 @@ def train(config_path=None):
         num_clients=config['num_clients'],
         output_dir=os.path.join(config['output_dir'], 'client_contributions')
     )
+    
+    # Log system metrics at the start
+    metrics_tracker.log_system_metrics()
     print(f"Model checkpoints will be saved to: {config['model_save_path']}")
     print(f"Client contributions will be logged to: {contribution_tracker.output_dir}")
     
@@ -578,17 +559,13 @@ def train(config_path=None):
                 avg_loss = total_loss / len(train_loader)
                 print(f"Client {client_idx} - Epoch {epoch+1}: Loss: {avg_loss:.4f}")
                 
-                # Log training metrics
-                log_metrics(metrics_file, {
-                    'round': round_num,
-                    'client_id': client_idx,
-                    'epoch': epoch + 1,
+                # Log training metrics using the metrics tracker
+                metrics_tracker.log_round_metrics(int(round_num), {
+                    'client_id': int(client_idx),
+                    'epoch': int(epoch + 1),
                     'phase': 'train',
-                    'loss': avg_loss,
-                    'rouge1': 0.0,     # Will be updated during evaluation
-                    'rouge2': 0.0,     # Will be updated during evaluation
-                    'rougeL': 0.0      # Will be updated during evaluation
-                })
+                    'loss': float(avg_loss)
+                }, client_id=int(client_idx))
             
             # Calculate client update and store model
             updated_weights = local_model.state_dict()
@@ -624,15 +601,14 @@ def train(config_path=None):
             print(f"  Min/Max Contribution: {round_metrics['min_contribution']:.4f}/{round_metrics['max_contribution']:.4f}")
             print(f"  Coefficient of Variation: {round_metrics['cv_contribution']:.4f}")
             
-            # Log to metrics file
-            log_metrics(metrics_file, {
-                'round': round_num,
+            # Log contribution metrics using metrics tracker
+            metrics_tracker.log_round_metrics(int(round_num), {
                 'phase': 'aggregation',
-                'gini_coefficient': round_metrics['gini'],
-                'mean_contribution': round_metrics['mean_contribution'],
-                'min_contribution': round_metrics['min_contribution'],
-                'max_contribution': round_metrics['max_contribution'],
-                'cv_contribution': round_metrics['cv_contribution']
+                'gini_coefficient': float(round_metrics['gini']),
+                'mean_contribution': float(round_metrics['mean_contribution']),
+                'min_contribution': float(round_metrics['min_contribution']),
+                'max_contribution': float(round_metrics['max_contribution']),
+                'cv_contribution': float(round_metrics['cv_contribution'])
             })
         
         # Aggregate model updates (Federated Averaging)
@@ -715,37 +691,64 @@ def train(config_path=None):
                     print("\nGENERATED SUMMARY:", preds[0])
                     print("-" * 50)
         
-        # Calculate ROUGE metrics
+        # Calculate average loss
         avg_loss = total_loss / len(test_loader)
-        try:
-            if all_predictions and all_references and len(all_predictions) == len(all_references):
-                # Ensure we have valid strings for ROUGE calculation
-                all_predictions = [str(p) if p is not None else '' for p in all_predictions]
-                all_references = [str(r) if r is not None else '' for r in all_references]
-                rouge_metrics = calculate_rouge_metrics(all_predictions, all_references)
-            else:
-                print(f"Warning: Predictions ({len(all_predictions)}) and references ({len(all_references)}) length mismatch or empty")
-                rouge_metrics = {'precision': 0.0, 'recall': 0.0, 'f1': 0.0}
-        except Exception as e:
-            print(f"Error calculating ROUGE metrics: {str(e)}")
-            print(f"Predictions sample: {all_predictions[:1] if all_predictions else 'None'}")
-            print(f"References sample: {all_references[:1] if all_references else 'None'}")
-            rouge_metrics = {'precision': 0.0, 'recall': 0.0, 'f1': 0.0}
         
-        # Log evaluation metrics with default values if ROUGE metrics are not available
-        log_metrics(metrics_file, {
-            'round': round_num,
-            'client_id': 'global',
-            'epoch': config['local_epochs'],
-            'phase': 'eval',
-            'loss': avg_loss,
-            'rouge1': rouge_metrics.get('rouge1', 0.0),
-            'rouge2': rouge_metrics.get('rouge2', 0.0),
-            'rougeL': rouge_metrics.get('rougeL', 0.0)
+        # Ensure we have valid strings for metrics calculation
+        all_predictions = [str(p) if p is not None else '' for p in all_predictions]
+        all_references = [str(r) if r is not None else '' for r in all_references]
+        
+        # Calculate all metrics using the metrics tracker
+        metrics_dict = metrics_tracker.calculate_all_metrics(all_predictions, all_references)
+        
+        # Convert all metric values to native Python types
+        metrics_dict = {k: float(v) if isinstance(v, (np.floating, float)) else v 
+                      for k, v in metrics_dict.items()}
+        
+        metrics_dict.update({
+            'phase': 'evaluation',
+            'loss': float(avg_loss)
         })
         
-        print(f"\nEvaluation Metrics - Loss: {avg_loss:.4f}, "
-              f"ROUGE-L F1: {rouge_metrics['f1']*100:.2f}%")
+        # Log metrics for this round
+        metrics_tracker.log_round_metrics(int(round_num), metrics_dict)
+        metrics_tracker.log_system_metrics()
+        
+        # Print summary
+        print(f"\nEvaluation Metrics - Round {round_num}")
+        print("-" * 50)
+        print(f"Loss: {avg_loss:.4f}")
+        
+        # Print ROUGE scores if available
+        if any(k in metrics_dict for k in ['rouge1_f1', 'rouge1']):
+            print("\nROUGE Scores (F1):")
+            rouge1 = metrics_dict.get('rouge1_f1', metrics_dict.get('rouge1', 0.0))
+            rouge2 = metrics_dict.get('rouge2_f1', metrics_dict.get('rouge2', 0.0))
+            rougeL = metrics_dict.get('rougeL_f1', metrics_dict.get('rougeL', 0.0))
+            print(f"  ROUGE-1: {rouge1:.4f}")
+            print(f"  ROUGE-2: {rouge2:.4f}")
+            print(f"  ROUGE-L: {rougeL:.4f}")
+        
+        # Print BLEU scores
+        if any(f'bleu_{n}' in metrics_dict for n in range(1, 5)):
+            print("\nBLEU Scores:")
+            for n in range(1, 5):
+                if f'bleu_{n}' in metrics_dict:
+                    print(f"  BLEU-{n}: {metrics_dict[f'bleu_{n}']:.4f}")
+        
+        # Print other metrics if available
+        other_metrics = []
+        if 'meteor' in metrics_dict:
+            other_metrics.append(f"METEOR: {metrics_dict['meteor']:.4f}")
+        if 'bertscore_f1' in metrics_dict:
+            other_metrics.append(f"BERTScore F1: {metrics_dict['bertscore_f1']:.4f}")
+        
+        if other_metrics:
+            print("\nOther Metrics:")
+            for metric in other_metrics:
+                print(f"  {metric}")
+        
+        print("-" * 50)
         
         # Save model checkpoint
         os.makedirs(config['model_save_path'], exist_ok=True)
@@ -754,13 +757,12 @@ def train(config_path=None):
             'round': round_num,
             'model_state_dict': model.state_dict(),
             'tokenizer': tokenizer,
-            'metrics': {
-                'loss': avg_loss,
-                'rouge1': rouge_metrics.get('rouge1', 0.0),
-                'rouge2': rouge_metrics.get('rouge2', 0.0),
-                'rougeL': rouge_metrics.get('rougeL', 0.0)
-            }
+            'metrics': metrics_dict
         }, checkpoint_path)
+        
+        # Clear GPU cache to free up memory
+        torch.cuda.empty_cache()
+        gc.collect()
         
         print(f"\nModel checkpoint saved to {checkpoint_path}")
         
@@ -781,9 +783,21 @@ def train(config_path=None):
     # Ensure all metrics are saved to disk
     contribution_tracker.save_metrics()
     
-    print("\n" + "="*50)
-    print("Client Contribution Summary:")
-    print("="*50)
+    # Generate and save training summary
+    training_summary = metrics_tracker.get_summary()
+    
+    print("\n" + "="*60)
+    print("TRAINING SUMMARY".center(60))
+    print("="*60)
+    print(f"Experiment: {config['experiment_name']}")
+    print(f"Total Rounds: {config['num_rounds']}")
+    print(f"Number of Clients: {config['num_clients']}")
+    print(f"Clients per Round: {config['clients_per_round']}")
+    print(f"Total Training Time: {training_summary['elapsed_time_seconds']/60:.2f} minutes")
+    
+    print("\n" + "-"*60)
+    print("CLIENT CONTRIBUTION SUMMARY".center(60))
+    print("-"*60)
     print(f"  Overall Gini Coefficient: {summary['inequality']['gini']:.4f}")
     print(f"  Overall Coefficient of Variation: {summary['inequality']['cv']:.4f}")
     
@@ -796,9 +810,45 @@ def train(config_path=None):
                                    key=lambda x: x[1], reverse=True):
         print(f"  Client {client_id}: {contrib:.4f}")
     
-    print("\n" + "="*50)
+    print("\n" + "="*60)
+    print("METRICS SUMMARY".center(60))
+    print("="*60)
+    
+    # Get the best metrics across all rounds
+    best_metrics = {}
+    for round_num, metrics in metrics_tracker.metrics.items():
+        for metric, value in metrics.items():
+            if metric not in best_metrics or value > best_metrics[metric][1]:
+                best_metrics[metric] = (round_num, value)
+    
+    # Print best metrics
+    print("\nBest Metrics:")
+    for metric, (round_num, value) in sorted(best_metrics.items()):
+        if metric not in ['round', 'phase']:
+            print(f"  {metric.upper()}: {value*100 if metric not in ['loss'] else value:.4f} "
+                  f"(Round {round_num})")
+    
+    print("\n" + "-"*60)
     print(f"\nTraining complete! Final model saved to {final_model_path}")
+    print(f"Metrics saved to: {training_summary['metrics_file']}")
     print(f"Client contribution analysis saved to: {contribution_tracker.output_dir}")
+    
+    # Save final summary to file
+    final_summary = {
+        'experiment_name': config['experiment_name'],
+        'config': config,
+        'training_summary': training_summary,
+        'client_summary': summary,
+        'best_metrics': best_metrics,
+        'completion_time': datetime.now().isoformat()
+    }
+    
+    summary_file = os.path.join(config['output_dir'], f"{config['experiment_name']}_final_summary.json")
+    with open(summary_file, 'w') as f:
+        json.dump(final_summary, f, indent=2)
+    
+    print(f"\nFinal summary saved to: {summary_file}")
+    print("="*60)
     
     # Generate visualizations
     try:
