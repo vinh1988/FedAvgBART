@@ -1,0 +1,128 @@
+{
+  "experiment_name": "fed_distilbart_cnndm",
+  "config": {
+    "experiment_name": "fed_distilbart_cnndm",
+    "num_rounds": 5,
+    "seed": 42,
+    "num_clients": 2,
+    "clients_per_round": 1,
+    "local_epochs": 1,
+    "batch_size": 8,
+    "learning_rate": 5e-05,
+    "weight_decay": 0.01,
+    "warmup_steps": 500,
+    "max_grad_norm": 1.0,
+    "model_name": "facebook/bart-large-cnn",
+    "max_source_length": 1024,
+    "max_target_length": 142,
+    "data_dir": "./data/cnndm",
+    "train_split": "train",
+    "val_split": "validation",
+    "test_split": "test",
+    "max_train_samples": null,
+    "max_val_samples": null,
+    "max_test_samples": null,
+    "output_dir": "./experiment_results/clients_2",
+    "model_save_path": "./experiment_results/clients_2/saved_models",
+    "logging_steps": 100,
+    "eval_steps": 500,
+    "save_steps": 1000,
+    "use_wandb": true,
+    "num_beams": 4,
+    "length_penalty": 2.0,
+    "no_repeat_ngram_size": 3,
+    "num_workers": 2
+  },
+  "training_summary": {
+    "num_rounds": 5,
+    "num_clients": 2,
+    "elapsed_time_seconds": 20168.13712477684,
+    "metrics_file": "./experiment_results/clients_2/fed_distilbart_cnndm_metrics_20250810_163323.json",
+    "experiment_name": "fed_distilbart_cnndm"
+  },
+  "client_summary": {
+    "total_contributions": {
+      "0": 311.50269317626953,
+      "1": 252.6131134033203
+    },
+    "avg_contributions": {
+      "0": 103.83423105875652,
+      "1": 126.30655670166016
+    },
+    "participation": {
+      "1": 2,
+      "0": 3
+    },
+    "inequality": {
+      "gini": 0.05219635674633469,
+      "cv": 0.10439271349266938,
+      "mean_contribution": 282.0579032897949,
+      "min_contribution": 252.6131134033203,
+      "max_contribution": 311.50269317626953
+    },
+    "total_rounds": 5
+  },
+  "best_metrics": {
+    "phase": [
+      1,
+      "evaluation"
+    ],
+    "gini_coefficient": [
+      1,
+      0.0
+    ],
+    "mean_contribution": [
+      1,
+      146.7021942138672
+    ],
+    "min_contribution": [
+      1,
+      146.7021942138672
+    ],
+    "max_contribution": [
+      1,
+      146.7021942138672
+    ],
+    "cv_contribution": [
+      1,
+      0.0
+    ],
+    "bleu1": [
+      5,
+      0.3989608850988208
+    ],
+    "bleu2": [
+      5,
+      0.26501502804957894
+    ],
+    "bleu3": [
+      5,
+      0.1986090187312111
+    ],
+    "bleu4": [
+      5,
+      0.15277139025818123
+    ],
+    "meteor": [
+      1,
+      0.0
+    ],
+    "rouge1_f1": [
+      3,
+      0.4235170228563727
+    ],
+    "rouge2_f1": [
+      3,
+      0.19704877601819248
+    ],
+    "rougeL_f1": [
+      4,
+      0.29501484951470164
+    ],
+    "loss": [
+      1,
+      1.8358423363350032
+    ]
+  },
+  "completion_time": "2025-08-10T22:09:32.050137"
+}

@@ -1,0 +1,13 @@
+=== Data Distribution Summary ===
+
+Number of clients: 2
+
+Samples per client:
+ client_id  train_samples  val_samples  test_samples
+         0         287113        13368         11490
+         1         287113        13368         11490
+
+Average text length per client:
+ client_id  avg_train_length  avg_val_length  avg_test_length
+         0        691.870326      676.026406        55.009312
+         1        691.870326      676.026406        55.009312

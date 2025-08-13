@@ -1,0 +1,162 @@
+{
+  "global_metrics": {
+    "1": {
+      "phase": "evaluation",
+      "gini_coefficient": 0.0,
+      "mean_contribution": 124.58238220214844,
+      "min_contribution": 124.58238220214844,
+      "max_contribution": 124.58238220214844,
+      "cv_contribution": 0.0,
+      "bleu1": 0.3899692603355708,
+      "bleu2": 0.2577485125543214,
+      "bleu3": 0.19264892219468333,
+      "bleu4": 0.14795486549988285,
+      "meteor": 0.0,
+      "rouge1_f1": 0.4105332123353115,
+      "rouge2_f1": 0.18852883446036728,
+      "rougeL_f1": 0.2866760137202735,
+      "loss": 1.8619718773131082
+    },
+    "2": {
+      "phase": "evaluation",
+      "gini_coefficient": 0.0,
+      "mean_contribution": 103.24321746826172,
+      "min_contribution": 103.24321746826172,
+      "max_contribution": 103.24321746826172,
+      "cv_contribution": 0.0,
+      "bleu1": 0.39535621740169324,
+      "bleu2": 0.26342427560983417,
+      "bleu3": 0.19774393042402894,
+      "bleu4": 0.1523460661694777,
+      "meteor": 0.0,
+      "rouge1_f1": 0.41612356858690863,
+      "rouge2_f1": 0.1943461676946984,
+      "rougeL_f1": 0.2932600941091104,
+      "loss": 1.807442457043801
+    },
+    "3": {
+      "phase": "evaluation",
+      "gini_coefficient": 0.0,
+      "mean_contribution": 90.91221618652344,
+      "min_contribution": 90.91221618652344,
+      "max_contribution": 90.91221618652344,
+      "cv_contribution": 0.0,
+      "bleu1": 0.4014431349507402,
+      "bleu2": 0.2671060912851391,
+      "bleu3": 0.1998682570598629,
+      "bleu4": 0.1533757017785456,
+      "meteor": 0.0,
+      "rouge1_f1": 0.41544248853463184,
+      "rouge2_f1": 0.19302112817632758,
+      "rougeL_f1": 0.2927476716530516,
+      "loss": 1.7996608967074272
+    },
+    "4": {
+      "phase": "evaluation",
+      "gini_coefficient": 0.0,
+      "mean_contribution": 94.40756225585938,
+      "min_contribution": 94.40756225585938,
+      "max_contribution": 94.40756225585938,
+      "cv_contribution": 0.0,
+      "bleu1": 0.3960671497432059,
+      "bleu2": 0.26505637681641064,
+      "bleu3": 0.1994507163556164,
+      "bleu4": 0.1537213313544399,
+      "meteor": 0.0,
+      "rouge1_f1": 0.4210496171742394,
+      "rouge2_f1": 0.19784908090972464,
+      "rougeL_f1": 0.2948512193876449,
+      "loss": 1.7877565423232777
+    },
+    "5": {
+      "phase": "evaluation",
+      "gini_coefficient": 0.0,
+      "mean_contribution": 86.23748016357422,
+      "min_contribution": 86.23748016357422,
+      "max_contribution": 86.23748016357422,
+      "cv_contribution": 0.0,
+      "bleu1": 0.39384591336649594,
+      "bleu2": 0.2614637228338204,
+      "bleu3": 0.19590395563640486,
+      "bleu4": 0.15063422879010602,
+      "meteor": 0.0,
+      "rouge1_f1": 0.4180233684673435,
+      "rouge2_f1": 0.19297881220316662,
+      "rougeL_f1": 0.29253008576124845,
+      "loss": 1.7963876572431752
+    }
+  },
+  "client_metrics": {
+    "2": {
+      "1": {
+        "client_id": 2,
+        "epoch": 1,
+        "phase": "train",
+        "loss": 2.1598533472368713
+      },
+      "3": {
+        "client_id": 2,
+        "epoch": 1,
+        "phase": "train",
+        "loss": 1.9267797957672022
+      }
+    },
+    "0": {
+      "2": {
+        "client_id": 0,
+        "epoch": 1,
+        "phase": "train",
+        "loss": 2.06283888943177
+      },
+      "5": {
+        "client_id": 0,
+        "epoch": 1,
+        "phase": "train",
+        "loss": 1.907378893558575
+      }
+    },
+    "1": {
+      "4": {
+        "client_id": 1,
+        "epoch": 1,
+        "phase": "train",
+        "loss": 2.0178584081218025
+      }
+    }
+  },
+  "system_metrics": {
+    "1754838582.5606935": {
+      "cpu_percent": 12.1,
+      "memory_rss_mb": 644.66015625,
+      "memory_percent": 0.5016308862592476,
+      "elapsed_time_seconds": 0.0006618499755859375
+    },
+    "1754841340.3707752": {
+      "cpu_percent": 16.5,
+      "memory_rss_mb": 5766.77734375,
+      "memory_percent": 4.487315683712324,
+      "elapsed_time_seconds": 2757.8107430934906
+    },
+    "1754844009.7178361": {
+      "cpu_percent": 16.9,
+      "memory_rss_mb": 5740.59765625,
+      "memory_percent": 4.466944423420688,
+      "elapsed_time_seconds": 5427.157803297043
+    },
+    "1754846694.9433503": {
+      "cpu_percent": 17.2,
+      "memory_rss_mb": 5667.96875,
+      "memory_percent": 4.410429525986731,
+      "elapsed_time_seconds": 8112.3833174705505
+    },
+    "1754849446.6956618": {
+      "cpu_percent": 17.3,
+      "memory_rss_mb": 4755.12890625,
+      "memory_percent": 3.700119364278074,
+      "elapsed_time_seconds": 10864.13562965393
+    }
+  },
+  "timestamp": "2025-08-11T01:55:51.435054",
+  "experiment_name": "fed_distilbart_cnndm",
+  "num_clients": 3
+}

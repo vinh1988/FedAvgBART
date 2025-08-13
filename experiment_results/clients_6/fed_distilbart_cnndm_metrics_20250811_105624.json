@@ -1,0 +1,228 @@
+{
+  "global_metrics": {
+    "1": {
+      "phase": "evaluation",
+      "gini_coefficient": 0.0007757509547023738,
+      "mean_contribution": 95.61004384358723,
+      "min_contribution": 95.42086791992188,
+      "max_contribution": 95.75463104248047,
+      "cv_contribution": 0.0014628006205439049,
+      "bleu1": 0.3672351280241288,
+      "bleu2": 0.24370546066749788,
+      "bleu3": 0.18259110785149252,
+      "bleu4": 0.14043035007086854,
+      "meteor": 0.0,
+      "rouge1_f1": 0.41534930286337085,
+      "rouge2_f1": 0.192407879516103,
+      "rougeL_f1": 0.28714535189003476,
+      "loss": 1.8275454466541607
+    },
+    "2": {
+      "phase": "evaluation",
+      "gini_coefficient": 0.008125910521539203,
+      "mean_contribution": 80.99260965983073,
+      "min_contribution": 79.02838897705078,
+      "max_contribution": 81.9900131225586,
+      "cv_contribution": 0.017149341147658412,
+      "bleu1": 0.37189236735836234,
+      "bleu2": 0.24821886522793274,
+      "bleu3": 0.18699117304357324,
+      "bleu4": 0.14463579286413936,
+      "meteor": 0.0,
+      "rouge1_f1": 0.4213851317797308,
+      "rouge2_f1": 0.1973346047792874,
+      "rougeL_f1": 0.2940579933730225,
+      "loss": 1.7929514507452646
+    },
+    "3": {
+      "phase": "evaluation",
+      "gini_coefficient": 0.01644096839630758,
+      "mean_contribution": 73.70687103271484,
+      "min_contribution": 71.31243133544922,
+      "max_contribution": 76.76558685302734,
+      "cv_contribution": 0.03086895822559847,
+      "bleu1": 0.4034171629644265,
+      "bleu2": 0.2704243214662959,
+      "bleu3": 0.20387538398754904,
+      "bleu4": 0.15791301330157057,
+      "meteor": 0.0,
+      "rouge1_f1": 0.42213162572154467,
+      "rouge2_f1": 0.19912775151386616,
+      "rougeL_f1": 0.29629780271692935,
+      "loss": 1.7693045899271964
+    },
+    "4": {
+      "phase": "evaluation",
+      "gini_coefficient": 0.016655551862533816,
+      "mean_contribution": 71.15859985351562,
+      "min_contribution": 67.64686584472656,
+      "max_contribution": 72.9802017211914,
+      "cv_contribution": 0.03490443764142569,
+      "bleu1": 0.38680908782638185,
+      "bleu2": 0.2593684931851132,
+      "bleu3": 0.1960867213021895,
+      "bleu4": 0.15212353481706783,
+      "meteor": 0.0,
+      "rouge1_f1": 0.42617203666370757,
+      "rouge2_f1": 0.20154542200029515,
+      "rougeL_f1": 0.299091428877308,
+      "loss": 1.7612735723455748
+    },
+    "5": {
+      "phase": "evaluation",
+      "gini_coefficient": 0.013460824118502959,
+      "mean_contribution": 66.95495351155598,
+      "min_contribution": 64.37413787841797,
+      "max_contribution": 68.42984771728516,
+      "cv_contribution": 0.027348513663298348,
+      "bleu1": 0.3971228013985641,
+      "bleu2": 0.2677074596895053,
+      "bleu3": 0.20293203189410444,
+      "bleu4": 0.15778948018734032,
+      "meteor": 0.0,
+      "rouge1_f1": 0.42691340066209515,
+      "rouge2_f1": 0.2032728183136084,
+      "rougeL_f1": 0.29990789368214466,
+      "loss": 1.7479556292295455
+    }
+  },
+  "client_metrics": {
+    "3": {
+      "1": {
+        "client_id": 3,
+        "epoch": 1,
+        "phase": "train",
+        "loss": 2.2182315224311457
+      },
+      "4": {
+        "client_id": 3,
+        "epoch": 1,
+        "phase": "train",
+        "loss": 1.9906107014893928
+      },
+      "5": {
+        "client_id": 3,
+        "epoch": 1,
+        "phase": "train",
+        "loss": 1.9099057185454578
+      }
+    },
+    "2": {
+      "1": {
+        "client_id": 2,
+        "epoch": 1,
+        "phase": "train",
+        "loss": 2.2123815009762158
+      },
+      "2": {
+        "client_id": 2,
+        "epoch": 1,
+        "phase": "train",
+        "loss": 2.031353962457288
+      },
+      "3": {
+        "client_id": 2,
+        "epoch": 1,
+        "phase": "train",
+        "loss": 1.9380203631959683
+      },
+      "4": {
+        "client_id": 2,
+        "epoch": 1,
+        "phase": "train",
+        "loss": 1.8686583183035728
+      },
+      "5": {
+        "client_id": 2,
+        "epoch": 1,
+        "phase": "train",
+        "loss": 1.808099167417101
+      }
+    },
+    "5": {
+      "1": {
+        "client_id": 5,
+        "epoch": 1,
+        "phase": "train",
+        "loss": 2.214356209892208
+      },
+      "4": {
+        "client_id": 5,
+        "epoch": 1,
+        "phase": "train",
+        "loss": 1.9862125717409875
+      }
+    },
+    "1": {
+      "2": {
+        "client_id": 1,
+        "epoch": 1,
+        "phase": "train",
+        "loss": 2.088793198626323
+      }
+    },
+    "0": {
+      "2": {
+        "client_id": 0,
+        "epoch": 1,
+        "phase": "train",
+        "loss": 2.091645896394928
+      },
+      "3": {
+        "client_id": 0,
+        "epoch": 1,
+        "phase": "train",
+        "loss": 1.9880560788371737
+      },
+      "5": {
+        "client_id": 0,
+        "epoch": 1,
+        "phase": "train",
+        "loss": 1.9148936197535324
+      }
+    },
+    "4": {
+      "3": {
+        "client_id": 4,
+        "epoch": 1,
+        "phase": "train",
+        "loss": 2.043559175456738
+      }
+    }
+  },
+  "system_metrics": {
+    "1754884584.5333016": {
+      "cpu_percent": 12.6,
+      "memory_rss_mb": 661.06640625,
+      "memory_percent": 0.5143971192083476,
+      "elapsed_time_seconds": 0.0005142688751220703
+    },
+    "1754888039.9316754": {
+      "cpu_percent": 22.4,
+      "memory_rss_mb": 5847.69921875,
+      "memory_percent": 4.550283607944123,
+      "elapsed_time_seconds": 3455.3988881111145
+    },
+    "1754891383.0044274": {
+      "cpu_percent": 22.5,
+      "memory_rss_mb": 5850.32421875,
+      "memory_percent": 4.552326205215978,
+      "elapsed_time_seconds": 6798.471639633179
+    },
+    "1754894673.9121242": {
+      "cpu_percent": 22.8,
+      "memory_rss_mb": 5850.5234375,
+      "memory_percent": 4.5524812237589325,
+      "elapsed_time_seconds": 10089.379336118698
+    },
+    "1754897996.171733": {
+      "cpu_percent": 24.0,
+      "memory_rss_mb": 5850.76171875,
+      "memory_percent": 4.552666638094621,
+      "elapsed_time_seconds": 13411.63894534111
+    }
+  },
+  "timestamp": "2025-08-11T15:35:08.128014",
+  "experiment_name": "fed_distilbart_cnndm",
+  "num_clients": 6
+}
