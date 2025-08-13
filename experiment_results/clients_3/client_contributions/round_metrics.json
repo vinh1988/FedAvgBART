@@ -1,0 +1,52 @@
+[
+  {
+    "round": 1,
+    "gini": 0.0,
+    "mean_contribution": 124.58238220214844,
+    "std_contribution": 0.0,
+    "min_contribution": 124.58238220214844,
+    "max_contribution": 124.58238220214844,
+    "cv_contribution": 0.0,
+    "num_participants": 1
+  },
+  {
+    "round": 2,
+    "gini": 0.0,
+    "mean_contribution": 103.24321746826172,
+    "std_contribution": 0.0,
+    "min_contribution": 103.24321746826172,
+    "max_contribution": 103.24321746826172,
+    "cv_contribution": 0.0,
+    "num_participants": 1
+  },
+  {
+    "round": 3,
+    "gini": 0.0,
+    "mean_contribution": 90.91221618652344,
+    "std_contribution": 0.0,
+    "min_contribution": 90.91221618652344,
+    "max_contribution": 90.91221618652344,
+    "cv_contribution": 0.0,
+    "num_participants": 1
+  },
+  {
+    "round": 4,
+    "gini": 0.0,
+    "mean_contribution": 94.40756225585938,
+    "std_contribution": 0.0,
+    "min_contribution": 94.40756225585938,
+    "max_contribution": 94.40756225585938,
+    "cv_contribution": 0.0,
+    "num_participants": 1
+  },
+  {
+    "round": 5,
+    "gini": 0.0,
+    "mean_contribution": 86.23748016357422,
+    "std_contribution": 0.0,
+    "min_contribution": 86.23748016357422,
+    "max_contribution": 86.23748016357422,
+    "cv_contribution": 0.0,
+    "num_participants": 1
+  }
+]
