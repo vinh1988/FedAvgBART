@@ -178,12 +178,15 @@ def plot_rouge_line_comparison(df, output_dir):
     # Create a single figure with all metrics
     fig, ax = plt.subplots(figsize=(14, 8))
     
-    # Define colors and markers for each metric
+    # Define a color palette for client counts
+    client_counts = sorted(df['Clients'].unique())
+    colors = sns.color_palette("husl", n_colors=len(client_counts))
+    
+    # Define metrics and markers
     metrics = ['ROUGE-1', 'ROUGE-2', 'ROUGE-L']
-    colors = sns.color_palette("husl", len(metrics))
     markers = ['o', 's', '^']
     
-    # Plot each metric with a different color and marker
+    # Plot each metric with different markers but same color per client count
     for i, metric in enumerate(metrics):
         metric_df = df[df['Metric'] == metric].copy()
         if metric_df.empty:
@@ -192,14 +195,14 @@ def plot_rouge_line_comparison(df, output_dir):
         # Pivot to get scores by client and round
         pivot_df = metric_df.pivot(index='Round', columns='Clients', values='Score')
         
-        # Plot each client count with the same color but different line styles
+        # Plot each client count with a unique color and consistent line style
         for j, client_count in enumerate(sorted(pivot_df.columns)):
-            line_style = ['-', '--', ':', '-.'][j % 4]  # Cycle through line styles
+            color_idx = client_counts.index(client_count)
             line = ax.plot(pivot_df.index, pivot_df[client_count], 
-                          marker=markers[i], markersize=6, linewidth=1.5,
-                          linestyle=line_style, color=colors[i],
-                          alpha=0.8, 
-                          label=f'{metric} - {client_count} Clients' if j == 0 else "")
+                         marker=markers[i], markersize=6, linewidth=1.5,
+                         linestyle='-', color=colors[color_idx],
+                         alpha=0.8, 
+                         label=f'{client_count} Clients - {metric}' if i == 0 else f'_{client_count} Clients - {metric}')
             
             # Add value annotation for the last point
             last_val = pivot_df[client_count].iloc[-1]
