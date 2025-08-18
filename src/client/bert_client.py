@@ -3,7 +3,8 @@ import torch.nn as nn
 from collections import Counter
 from tqdm import tqdm
 from torch.utils.data import DataLoader
-from transformers import AdamW, get_linear_schedule_with_warmup
+from torch.optim import AdamW
+from transformers import get_linear_schedule_with_warmup
 from src.models.bert_model import BERT
 from src.datasets.agnews import AGNewsDataset
 from src.datasets.twenty_news import TwentyNewsDataset

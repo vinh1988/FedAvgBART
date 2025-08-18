@@ -60,7 +60,9 @@ class CNNDMDataset(Dataset):
             'labels': labels['input_ids'].squeeze()
         }
 
-def load_cnndm(data_dir, num_clients=10, test_size=0.1, random_state=42, max_train_samples=None, max_val_samples=None, max_test_samples=None):
+def load_cnndm(data_dir, num_clients=10, test_size=0.1, random_state=42,
+               max_train_samples=None, max_val_samples=None, max_test_samples=None,
+               dirichlet_alpha=None):
     """Load CNN/DailyMail dataset and split it into multiple clients.
     
     Args:
@@ -89,8 +91,9 @@ def load_cnndm(data_dir, num_clients=10, test_size=0.1, random_state=42, max_tra
     def process_split(split_name, max_samples=None):
         print(f"Processing {split_name} data...")
         data = dataset[split_name]
-        if max_samples is not None and len(data) > max_samples * num_clients:
-            indices = np.random.choice(len(data), max_samples * num_clients, replace=False)
+        if max_samples is not None and len(data) > max_samples:
+            # If we have more samples than the max, randomly select max_samples
+            indices = np.random.choice(len(data), max_samples, replace=False)
             data = data.select(indices)
         return data
     
@@ -108,7 +111,7 @@ def load_cnndm(data_dir, num_clients=10, test_size=0.1, random_state=42, max_tra
     val_dataset = create_dataset(val_data)
     test_dataset = create_dataset(test_data)
     
-    def split_into_clients(dataset, num_clients, max_samples=None):
+    def split_into_clients(dataset, num_clients, max_samples_per_client=None):
         if dataset is None:
             return [None] * num_clients
             
@@ -116,20 +119,53 @@ def load_cnndm(data_dir, num_clients=10, test_size=0.1, random_state=42, max_tra
         indices = np.arange(dataset_size)
         np.random.shuffle(indices)
         
-        # Split indices among clients
-        if max_samples is not None:
-            # Ensure we have enough samples for all clients
-            max_total = max_samples * num_clients
-            if dataset_size > max_total:
-                indices = indices[:max_total]
+        # Calculate how many samples to use in total
+        if max_samples_per_client is not None:
+            max_total = min(max_samples_per_client * num_clients, dataset_size)
+        else:
+            max_total = dataset_size
         
-        client_indices = np.array_split(indices, num_clients)
+        # Limit the indices to max_total
+        if len(indices) > max_total:
+            indices = indices[:max_total]
+
+        # Determine client slice sizes
+        if dirichlet_alpha is not None:
+            # Sample proportions and convert to integer counts summing to max_total
+            props = np.random.dirichlet(alpha=[float(dirichlet_alpha)] * num_clients)
+            counts = np.maximum(1, np.round(props * len(indices)).astype(int))
+            # Adjust to match exactly
+            diff = int(np.sum(counts) - len(indices))
+            if diff != 0:
+                # Trim or pad the largest counts to fix diff
+                order = np.argsort(-counts)
+                i = 0
+                while diff > 0 and i < len(order):
+                    if counts[order[i]] > 1:
+                        counts[order[i]] -= 1
+                        diff -= 1
+                    i = (i + 1) % len(order)
+                while diff < 0:
+                    counts[order[0]] += 1
+                    diff += 1
+            # Create client index slices
+            client_indices = []
+            start = 0
+            for c in counts:
+                end = start + int(c)
+                client_indices.append(indices[start:end])
+                start = end
+        else:
+            # IID-ish equal split
+            client_indices = np.array_split(indices, num_clients)
         
         client_datasets = []
         for client_idx in range(num_clients):
             if client_idx < len(client_indices):
-                # Convert to list of Python integers
+                # Convert to list of Python integers and apply per-client limit
                 client_indices_list = [int(i) for i in client_indices[client_idx] if i < len(dataset)]
+                if max_samples_per_client is not None and len(client_indices_list) > max_samples_per_client:
+                    client_indices_list = client_indices_list[:max_samples_per_client]
                 client_dataset = Subset(dataset, client_indices_list) if client_indices_list else None
             else:
                 client_dataset = None
@@ -138,9 +174,21 @@ def load_cnndm(data_dir, num_clients=10, test_size=0.1, random_state=42, max_tra
         return client_datasets
     
     print("Splitting data among clients...")
-    train_datasets = split_into_clients(train_dataset, num_clients, max_train_samples)
-    val_datasets = split_into_clients(val_dataset, num_clients, max_val_samples)
-    test_datasets = split_into_clients(test_dataset, num_clients, max_test_samples)
+    train_datasets = split_into_clients(train_dataset, num_clients, max_samples_per_client=max_train_samples)
+    val_datasets = split_into_clients(val_dataset, num_clients, max_samples_per_client=max_val_samples)
+    test_datasets = split_into_clients(test_dataset, num_clients, max_samples_per_client=max_test_samples)
+    
+    # Debug logging for dataset sizes
+    print("\nDebug - Dataset sizes after splitting:")
+    print(f"- Training datasets: {[len(ds) if ds is not None else 0 for ds in train_datasets]}")
+    print(f"- Validation datasets: {[len(ds) if ds is not None else 0 for ds in val_datasets]}")
+    print(f"- Test datasets: {[len(ds) if ds is not None else 0 for ds in test_datasets]}")
+    
+    # Check for None datasets
+    print("\nDebug - Number of None datasets:")
+    print(f"- Training: {sum(1 for ds in train_datasets if ds is None)}/{len(train_datasets)}")
+    print(f"- Validation: {sum(1 for ds in val_datasets if ds is None)}/{len(val_datasets)}")
+    print(f"- Test: {sum(1 for ds in test_datasets if ds is None)}/{len(test_datasets)}")
     
     print(f"Dataset loaded successfully. {num_clients} clients with:"
           f"\n- Training: {sum(len(ds) if ds else 0 for ds in train_datasets)} total samples"

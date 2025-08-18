@@ -3,6 +3,49 @@
 
 This repository contains an implementation of Federated Learning with BART for abstractive text summarization on the CNN/DailyMail dataset. The implementation supports federated training of sequence-to-sequence models with non-IID data distribution across clients, along with comprehensive visualization and analysis tools.
 
+# Centralized CNN/DailyMail fine-tuning (BART, DistilBART)
+
+This repo also includes a standalone centralized training script for CNN/DailyMail summarization using BART and DistilBART: `train_cnndm_centralized.py`.
+
+- Location: `commit/FED-OPT-BERT-PYTORCH/train_cnndm_centralized.py`
+- Trains both models sequentially and writes paper-ready CSVs.
+
+Quick start (fast smoke run):
+
+```bash
+python train_cnndm_centralized.py \
+  --epochs 2 --batch_size 2 --eval_batch_size 2 \
+  --limit_train_samples 200 --limit_eval_samples 100 --limit_test_samples 50 \
+  --use_bertscore --no_artifacts
+```
+
+Full run example:
+
+```bash
+python train_cnndm_centralized.py \
+  --epochs 5 --batch_size 4 --eval_batch_size 4 \
+  --use_bertscore \
+  --output_root ./results_cnndm_centralized
+```
+
+Important flags:
+
+- `--use_bertscore`: include BERTScore columns (`bertscore_precision/recall/f1`).
+- `--no_artifacts`: skip saving HF Trainer artifacts; only CSVs are kept.
+- `--limit_*_samples`: cap dataset sizes for quick runs.
+- `--force_cpu`: force CPU and disable fp16.
+- `--seed`: default 42; set for reproducibility.
+
+Outputs (CSV):
+
+- Per-model CSVs:
+  - `centralize_data_gen_text/results_distilbart_cnndm_centralized.csv`
+  - `centralize_data_gen_text/results_bart_cnndm_centralized.csv`
+- Combined CSV:
+  - `centralize_data_gen_text/results_cnndm_centralized_all.csv`
+
+Columns include: `model, hub_id, epoch, rouge1, rouge2, rougeL, rougeLsum, bleu, meteor, chrf, bertscore_precision, bertscore_recall, bertscore_f1, loss, perplexity`.
+
 # Federated Learning for Abstractive Text Summarization: Experimental Results
 
 ## 1. Abstract
@@ -392,11 +435,37 @@ python train_fed_bart_cnndm.py \
     --output_dir experiment_results/clients_5
 ```
 
+Outputs:
+- __Saved model__: `./saved_models/bart_cnndm_federated` (config: `model_save_path`)
+- __Results directory__: `./results_bart_cnndm_federated` or the value of `output_dir`
+  - `client_contributions.csv` (per-round client update stats)
+  - `client_data_distribution.csv` and `data_distribution_summary.txt`
+  - Per-round metrics CSVs (ROUGE-1/2/L, loss) via the metrics tracker
+- __Console logs__: per-round progress, client training, validation ROUGE
+
+Sample console output:
+```text
+Using device: cuda
+Loading CNN/DailyMail dataset...
+Dataset loaded successfully. 10 clients with 287113 training examples and 11490 test examples.
+
+=== Round 1/13 ===
+--- Training client 0 ---
+Epoch 1: 100%|████████████████████| ... | loss=1.78
+Validation ROUGE scores: {'rouge1_f1': 0.41, 'rouge2_f1': 0.19, 'rougeL_f1': 0.29}
+New best model saved with ROUGE-L F1: 0.2900
+```
+
 #### Multiple Configurations
-To run experiments with different numbers of clients (2-10):
+To run experiments with different numbers of clients (2-10) for both BART-large and DistilBART:
 
 ```bash
 python run_experiments.py --config configs/bart_cnndm.yaml \
+    --min-clients 2 \
+    --max-clients 10 \
+    --num-rounds 10
+
+python run_experiments.py --config configs/distilbart_cnndm_federated.yaml \
     --min-clients 2 \
     --max-clients 10 \
     --num-rounds 10
@@ -798,6 +867,27 @@ Alternatively, you can use a YAML configuration file:
 ```bash
 python train_fed_bart_cnndm.py --config configs/bart_cnndm.yaml
 ```
+
+### Dirichlet non-IID sweep (DistilBART)
+
+Reproduce a 2–10 client sweep for 5 rounds at α ∈ {0.5, 0.1} using the DistilBART federated pipeline:
+
+```bash
+for a in 0.5 0.1; do \
+  /mnt/sda1/Projects/jsl/vp_gitlab/FED/FED-OPT-BERT/FED-OPT-BERT-main/.venv/bin/python \
+    tools/run_distilbart_experiments.py \
+    --config configs/distilbart_cnndm_federated.yaml \
+    --min-clients 2 --max-clients 10 \
+    --num-rounds 5 \
+    --extra \
+    --dirichlet_alpha "$a"; \
+done
+```
+
+Outputs:
+- Per-run results under `results_distilbart_cnndm_federated/nc_{N}/run_*`
+- Consolidated CSV at `experiment_results/analysis/consolidated_metrics_distil_gen_fed.csv`
+- Cross-model comparison artifacts in `experiment_results/analysis/compare_bart_distil/` (via `tools/compare_bart_distil.py`)
 
 ## Performance Optimization
 

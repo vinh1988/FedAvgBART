@@ -165,7 +165,7 @@ def main():
     # Usage: consolidate_distilbart_metrics.py [base_results_dir] [output_csv]
     cwd = Path.cwd()
     base = Path(sys.argv[1]) if len(sys.argv) > 1 else cwd / 'results_distilbart_cnndm_federated'
-    out = Path(sys.argv[2]) if len(sys.argv) > 2 else base / 'consolidated_metrics.csv'
+    out = Path(sys.argv[2]) if len(sys.argv) > 2 else base / 'consolidated_metrics_distil_gen_fed.csv'
     rows = consolidate(base)
     write_consolidated(rows, out)
     print(f'Wrote consolidated CSV: {out} ({len(rows)} rows)')

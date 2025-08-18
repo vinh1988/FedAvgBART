@@ -19,10 +19,9 @@ def load_data(csv_path: Path) -> pd.DataFrame:
     return df
 
 
-def plot_rouge_across_clients_last_round(df: pd.DataFrame, out_dir: Path):
+def plot_rouge_across_clients_last_round(df: pd.DataFrame, out_dir: Path, suffix=""):
     # take last round per (num_clients, dirichlet_alpha)
-    group_cols = ['num_clients'] + (['dirichlet_alpha'] if 'dirichlet_alpha' in df.columns else [])
-    last = df.sort_values(group_cols + ['round']).groupby(group_cols).tail(1)
+    last = df.sort_values('round').groupby(['num_clients', 'dirichlet_alpha'] if 'dirichlet_alpha' in df.columns else ['num_clients']).tail(1)
     plt.figure(figsize=(8,5))
     hue = 'dirichlet_alpha' if 'dirichlet_alpha' in last.columns else None
     for col, label in [("rouge1_f1", "ROUGE-1"), ("rouge2_f1", "ROUGE-2"), ("rougeL_f1", "ROUGE-L")]:
@@ -33,14 +32,13 @@ def plot_rouge_across_clients_last_round(df: pd.DataFrame, out_dir: Path):
     plt.xlabel('Number of Clients')
     plt.ylabel('ROUGE F1')
     plt.title('ROUGE vs Number of Clients (last round)' + (" by Dirichlet α" if hue else ""))
-    plt.tight_layout()
-    plt.savefig(out_dir / 'rouge_metrics.png', dpi=200)
+    fname = 'rouge_metrics{}.png'.format(suffix)
+    plt.savefig(Path(out_dir) / fname, bbox_inches='tight')
     plt.close()
 
 
-def plot_bleu_across_clients_last_round(df: pd.DataFrame, out_dir: Path):
-    group_cols = ['num_clients'] + (['dirichlet_alpha'] if 'dirichlet_alpha' in df.columns else [])
-    last = df.sort_values(group_cols + ['round']).groupby(group_cols).tail(1)
+def plot_bleu_across_clients_last_round(df, out_dir, suffix=""):
+    last = df.sort_values('round').groupby(['num_clients', 'dirichlet_alpha'] if 'dirichlet_alpha' in df.columns else ['num_clients']).tail(1)
     plt.figure(figsize=(8,5))
     hue = 'dirichlet_alpha' if 'dirichlet_alpha' in last.columns else None
     for col, label in [("bleu1", "BLEU-1"), ("bleu2", "BLEU-2"), ("bleu3", "BLEU-3"), ("bleu4", "BLEU-4")]:
@@ -52,63 +50,79 @@ def plot_bleu_across_clients_last_round(df: pd.DataFrame, out_dir: Path):
     plt.xlabel('Number of Clients')
     plt.ylabel('BLEU')
     plt.title('BLEU vs Number of Clients (last round)' + (" by Dirichlet α" if hue else ""))
-    plt.tight_layout()
-    plt.savefig(out_dir / 'bleu_metrics.png', dpi=200)
+    fname = 'bleu_metrics{}.png'.format(suffix)
+    plt.savefig(Path(out_dir) / fname, bbox_inches='tight')
     plt.close()
 
 
-def plot_training_loss_over_rounds(df: pd.DataFrame, out_dir: Path):
-    plt.figure(figsize=(9,5))
-    if 'dirichlet_alpha' in df.columns:
-        sns.lineplot(data=df, x='round', y='loss', hue='dirichlet_alpha', style='num_clients', marker='o')
-    else:
-        sns.lineplot(data=df, x='round', y='loss', hue='num_clients', marker='o')
-    plt.xlabel('Round')
-    plt.ylabel('Validation Loss')
-    plt.title('Validation Loss over Rounds' + (" by Dirichlet α and #Clients" if 'dirichlet_alpha' in df.columns else " by Number of Clients"))
-    plt.legend(title=('Dirichlet α' if 'dirichlet_alpha' in df.columns else 'num_clients'))
-    plt.tight_layout()
-    plt.savefig(out_dir / 'training_loss.png', dpi=200)
-    plt.close()
-
-
-def plot_rouge1_convergence(df: pd.DataFrame, out_dir: Path, num_clients: int | None, alpha: float | None):
-    if num_clients is None:
-        num_clients = sorted(df['num_clients'].unique())[-1]
-    sub = df[df['num_clients'] == num_clients].sort_values('round')
+def plot_training_loss(df, out_dir, suffix=""):
     plt.figure(figsize=(8,5))
-    if 'dirichlet_alpha' in sub.columns and alpha is None:
-        sns.lineplot(data=sub, x='round', y='rouge1_f1', hue='dirichlet_alpha', marker='o')
-    elif 'dirichlet_alpha' in sub.columns and alpha is not None:
-        sub = sub[sub['dirichlet_alpha'] == alpha]
-        sns.lineplot(data=sub, x='round', y='rouge1_f1', marker='o')
-    else:
-        sns.lineplot(data=sub, x='round', y='rouge1_f1', marker='o')
+    hue = 'dirichlet_alpha' if 'dirichlet_alpha' in df.columns else None
+    style = 'num_clients' if 'num_clients' in df.columns else None
+    sns.lineplot(data=df, x='round', y='loss', hue=hue, style=style, markers=True)
+    plt.xlabel('Round')
+    plt.ylabel('Training Loss')
+    plt.title('Training Loss over Rounds' + (" by Dirichlet α" if hue else ""))
+    fname = 'training_loss{}.png'.format(suffix)
+    plt.savefig(Path(out_dir) / fname, bbox_inches='tight')
+    plt.close()
+
+
+def plot_rouge1_convergence(df, out_dir, conv_nc=None, conv_alpha=None, suffix=""):
+    if conv_nc is not None:
+        df = df[df['num_clients'] == conv_nc]
+    if conv_alpha is not None and 'dirichlet_alpha' in df.columns:
+        df = df[df['dirichlet_alpha'] == conv_alpha]
+    if df.empty:
+        return
+    plt.figure(figsize=(8,5))
+    hue = 'dirichlet_alpha' if (conv_alpha is None and 'dirichlet_alpha' in df.columns) else None
+    style = 'num_clients' if (conv_nc is None and 'num_clients' in df.columns) else None
+    sns.lineplot(data=df, x='round', y='rouge1_f1', hue=hue, style=style, markers=True)
+    title_parts = ["ROUGE-1 Convergence"]
+    if conv_nc is not None:
+        title_parts.append(f"nc={conv_nc}")
+    if conv_alpha is not None:
+        title_parts.append(f"α={conv_alpha}")
+    plt.title(' '.join(title_parts))
     plt.xlabel('Round')
     plt.ylabel('ROUGE-1 F1')
-    suffix = f" (num_clients={num_clients}" + (f", alpha={alpha}" if alpha is not None else ")")
-    plt.title('ROUGE-1 Convergence' + suffix)
-    plt.tight_layout()
-    plt.savefig(out_dir / 'rouge1_convergence.png', dpi=200)
+    fname = 'rouge1_convergence{}.png'.format(suffix)
+    plt.savefig(Path(out_dir) / fname, bbox_inches='tight')
     plt.close()
 
 
 def main():
     ap = argparse.ArgumentParser(description='Visualize consolidated metrics')
-    ap.add_argument('--csv', default='results_distilbart_cnndm_federated/consolidated_metrics.csv')
+    ap.add_argument('--csv', default='experiment_results/analysis/consolidated_metrics_distil_gen_fed.csv')
     ap.add_argument('--out-dir', default='results_distilbart_cnndm_federated')
     ap.add_argument('--conv-nc', type=int, default=None, help='num_clients to use for convergence plot')
     ap.add_argument('--conv-alpha', type=float, default=None, help='Dirichlet alpha to filter for convergence plot (omit to overlay all)')
+    ap.add_argument('--split-by-alpha', action='store_true', help='Generate separate plots per dirichlet_alpha value')
     args = ap.parse_args()
 
     out_dir = Path(args.out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
     df = load_data(Path(args.csv))
 
+    # Overlay (default) plots
     plot_rouge_across_clients_last_round(df, out_dir)
     plot_bleu_across_clients_last_round(df, out_dir)
-    plot_training_loss_over_rounds(df, out_dir)
-    plot_rouge1_convergence(df, out_dir, args.conv_nc, args.conv_alpha)
+    plot_training_loss(df, out_dir)
+    plot_rouge1_convergence(df, out_dir, conv_nc=args.conv_nc, conv_alpha=args.conv_alpha)
+
+    # Per-alpha plots (BART-style per-config)
+    if args.split_by_alpha and 'dirichlet_alpha' in df.columns:
+        for a in sorted(df['dirichlet_alpha'].dropna().unique()):
+            df_a = df[df['dirichlet_alpha'] == a].copy()
+            # Remove hue for per-alpha plots to match per-config styling
+            df_a = df_a.drop(columns=['dirichlet_alpha'])
+            suf = f"_alpha_{a}"
+            plot_rouge_across_clients_last_round(df_a, out_dir, suffix=suf)
+            plot_bleu_across_clients_last_round(df_a, out_dir, suffix=suf)
+            plot_training_loss(df_a, out_dir, suffix=suf)
+            # Convergence for this alpha (respect conv-nc if provided)
+            plot_rouge1_convergence(df, out_dir, conv_nc=args.conv_nc, conv_alpha=a, suffix=suf)
 
     print(f'Wrote plots to {out_dir}')
 
