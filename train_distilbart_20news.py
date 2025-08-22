@@ -1,5 +1,6 @@
 import os
 import sys
+import argparse
 import torch
 import numpy as np
 import pandas as pd
@@ -17,11 +18,31 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from src.models.distilbart import DistilBART
 from src.datasets.news20 import load_20newsgroups
 
-def train():
+def parse_args():
+    parser = argparse.ArgumentParser(description="Federated DistilBART on 20 Newsgroups")
+    parser.add_argument("--num_clients", type=int, default=10, help="Number of clients")
+    parser.add_argument("--num_rounds", type=int, default=22, help="Federated rounds")
+    parser.add_argument("--participation_rate", type=float, default=0.5,
+                        help="Fraction of clients selected per round (0 < r <= 1)")
+    parser.add_argument("--min_clients_per_round", type=int, default=1,
+                        help="Minimum clients selected per round (use 2 for small-N)")
+    parser.add_argument("--dirichlet_alpha", type=float, default=None,
+                        help="Dirichlet concentration for non-IID split; None means IID random split")
+    parser.add_argument("--dirichlet_min_size", type=int, default=10,
+                        help="Minimum samples per client in Dirichlet partition")
+    parser.add_argument("--output_dir", type=str, default="results_distilbart_fed_runs_20news",
+                        help="Base directory to store run artifacts (metrics, checkpoints, logs)")
+    return parser.parse_args()
+
+def train(args):
     # Configuration
     config = {
-        'num_clients': 10,
-        'num_rounds': 22,
+        'num_clients': args.num_clients,
+        'num_rounds': args.num_rounds,
+        'participation_rate': args.participation_rate,
+        'min_clients_per_round': args.min_clients_per_round,
+        'dirichlet_alpha': args.dirichlet_alpha,
+        'dirichlet_min_size': args.dirichlet_min_size,
         'epochs_per_client': 1,
         'batch_size': 16,
         'learning_rate': 2e-5,
@@ -29,7 +50,8 @@ def train():
         'model_name': 'distilbart-20news',
         'project_name': 'federated-distilbart-20news',
         'data_dir': "./data/20newsgroups",
-        'model_save_path': "./saved_models/distilbart_20news"
+        'model_save_path': "./saved_models/distilbart_20news",
+        'output_dir': args.output_dir,
     }
     
     # Initialize wandb
@@ -45,6 +67,10 @@ def train():
     # Unpack config
     num_clients = config['num_clients']
     num_rounds = config['num_rounds']
+    participation_rate = float(config.get('participation_rate', 0.5))
+    min_clients_per_round = int(config.get('min_clients_per_round', 1))
+    dirichlet_alpha = config.get('dirichlet_alpha', None)
+    dirichlet_min_size = int(config.get('dirichlet_min_size', 10))
     epochs_per_client = config['epochs_per_client']
     batch_size = config['batch_size']
     learning_rate = config['learning_rate']
@@ -52,10 +78,17 @@ def train():
     data_dir = config['data_dir']
     model_save_path = config['model_save_path']
     
-    # Create results directory
-    os.makedirs("results", exist_ok=True)
+    # Create run-specific results directory
+    output_dir = config.get('output_dir', 'fed_runs')
+    os.makedirs(output_dir, exist_ok=True)
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    results_file = f"results/training_metrics_{timestamp}.csv"
+    run_dir = os.path.join(
+        output_dir,
+        f"clients_{num_clients}_rounds_{num_rounds}",
+        timestamp,
+    )
+    os.makedirs(run_dir, exist_ok=True)
+    results_file = os.path.join(run_dir, f"training_metrics_{timestamp}.csv")
     
     # Initialize metrics storage
     metrics_columns = [
@@ -71,11 +104,49 @@ def train():
     # Load data
     print("Loading 20 Newsgroups dataset...")
     train_datasets, test_datasets, num_classes, tokenizer = load_20newsgroups(
-        data_dir, 
-        num_clients=num_clients, 
-        test_size=0.2, 
-        random_state=42
+        data_dir,
+        num_clients=num_clients,
+        test_size=0.2,
+        random_state=42,
+        dirichlet_alpha=dirichlet_alpha,
+        dirichlet_min_size=dirichlet_min_size,
     )
+    # Compute and save per-client data contributions and label distributions
+    total_train = sum(len(ds) for ds in train_datasets)
+    total_test = sum(len(ds) for ds in test_datasets)
+    # Access base label arrays from underlying datasets
+    base_train_labels = train_datasets[0].dataset.labels
+    base_test_labels = test_datasets[0].dataset.labels
+
+    contrib_rows = []
+    label_rows_train = []
+    label_rows_test = []
+    for cid in range(num_clients):
+        tr_ds = train_datasets[cid]
+        te_ds = test_datasets[cid]
+        tr_idx = tr_ds.indices
+        te_idx = te_ds.indices
+        tr_size = len(tr_ds)
+        te_size = len(te_ds)
+        contrib_rows.append({
+            'client_id': cid,
+            'train_size': tr_size,
+            'train_prop': tr_size / total_train if total_train > 0 else 0.0,
+            'test_size': te_size,
+            'test_prop': te_size / total_test if total_test > 0 else 0.0,
+        })
+        # Label distributions
+        tr_labels = base_train_labels[tr_idx]
+        te_labels = base_test_labels[te_idx]
+        tr_counts = np.bincount(tr_labels, minlength=num_classes)
+        te_counts = np.bincount(te_labels, minlength=num_classes)
+        for cls in range(num_classes):
+            label_rows_train.append({'client_id': cid, 'class_id': cls, 'count': int(tr_counts[cls])})
+            label_rows_test.append({'client_id': cid, 'class_id': cls, 'count': int(te_counts[cls])})
+
+    pd.DataFrame(contrib_rows).to_csv(os.path.join(run_dir, 'data_contribution.csv'), index=False)
+    pd.DataFrame(label_rows_train).to_csv(os.path.join(run_dir, 'label_distribution_train.csv'), index=False)
+    pd.DataFrame(label_rows_test).to_csv(os.path.join(run_dir, 'label_distribution_test.csv'), index=False)
     
     # Initialize global model
     print("Initializing DistilBART model...")
@@ -94,16 +165,25 @@ def train():
     
     # Federated training loop
     print("Starting federated training...")
+    participation_rows = []
     for round_num in range(1, num_rounds + 1):
         print(f"\nRound {round_num}/{num_rounds}")
         
-        # Randomly select clients for this round
+        # Randomly select clients for this round based on participation settings
+        # Compute number of participants using ceil, enforce bounds
+        k = int(np.ceil(num_clients * participation_rate))
+        k = max(min_clients_per_round, k)
+        k = min(k, num_clients)
         selected_clients = np.random.choice(
-            num_clients, 
-            size=max(1, int(num_clients * 0.5)),  # 50% participation rate
+            num_clients,
+            size=k,
             replace=False
         )
         
+        # Record participation for this round
+        for cid in range(num_clients):
+            participation_rows.append({'round': round_num, 'client_id': cid, 'selected': int(cid in selected_clients)})
+
         # Client update phase
         client_models = []
         client_sizes = []
@@ -253,7 +333,7 @@ def train():
         val_loss = 0.0
         
         with torch.no_grad():
-            for client_idx in range(min(3, num_clients)):  # Evaluate on first 3 clients for efficiency
+            for client_idx in range(num_clients):  # Evaluate on all clients
                 test_loader = DataLoader(
                     test_datasets[client_idx],
                     batch_size=batch_size,
@@ -318,8 +398,9 @@ def train():
         metrics_df.to_csv(results_file, index=False)
         print(f"Metrics saved to {results_file}")
         
-        # Save model checkpoint
-        os.makedirs(model_save_path, exist_ok=True)
+        # Save model checkpoint into run-specific folder
+        model_checkpoint_dir = os.path.join(run_dir, "checkpoints")
+        os.makedirs(model_checkpoint_dir, exist_ok=True)
         torch.save({
             'round': round_num,
             'model_state_dict': model.state_dict(),
@@ -328,19 +409,22 @@ def train():
             'f1': f1,
             'precision': precision,
             'recall': recall
-        }, os.path.join(model_save_path, f'model_round_{round_num}.pt'))
+        }, os.path.join(model_checkpoint_dir, f'model_round_{round_num}.pt'))
         
-        print(f"Model checkpoint saved to {model_save_path}")
+        print(f"Model checkpoint saved to {model_checkpoint_dir}")
         
         # Save model checkpoints to wandb
-        checkpoint_path = os.path.join(model_save_path, f'model_round_{round_num}.pt')
+        checkpoint_path = os.path.join(model_checkpoint_dir, f'model_round_{round_num}.pt')
         wandb.save(checkpoint_path)
     
     # Save final metrics to a CSV file
     metrics_df = pd.DataFrame(metrics_data)
-    metrics_file = os.path.join("results", f"training_metrics_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv")
+    metrics_file = os.path.join(run_dir, f"training_metrics_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv")
     metrics_df.to_csv(metrics_file, index=False)
     wandb.save(metrics_file)
+    # Save participation log
+    if participation_rows:
+        pd.DataFrame(participation_rows).to_csv(os.path.join(run_dir, 'participation.csv'), index=False)
     
     # Log the final metrics as a table
     metrics_table = wandb.Table(dataframe=metrics_df)
@@ -355,4 +439,5 @@ def train():
     print(metrics_df.groupby(['phase']).mean(numeric_only=True)[['loss', 'accuracy', 'precision', 'recall', 'f1']])
 
 if __name__ == "__main__":
-    train()
+    args = parse_args()
+    train(args)
