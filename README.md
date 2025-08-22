@@ -461,14 +461,31 @@ To run experiments with different numbers of clients (2-10) for both BART-large 
 
 ```bash
 python run_experiments.py --config configs/bart_cnndm.yaml \
+    --output-dir ./results_bart_cnndm_federated \
     --min-clients 2 \
-    --max-clients 10 \
+    --max-clients 5 \
     --num-rounds 10
 
 python run_experiments.py --config configs/distilbart_cnndm_federated.yaml \
+    --output-dir ./results_distil_bart_cnndm_federated \
     --min-clients 2 \
     --max-clients 10 \
     --num-rounds 10
+```
+
+#### Background sweep (nohup)
+
+Run a sweep of BART federated experiments for multiple Dirichlet alphas in the background. Logs are saved per alpha (e.g., `log_bart_alpha_0.5.txt`).
+
+```bash
+nohup bash -c 'for a in 0.5 0.1; do
+  python tools/run_bart_large_experiments.py \
+    --config configs/bart_cnndm.yaml \
+    --min-clients 2 --max-clients 5 \
+    --num-rounds 2 \
+    --extra --dirichlet_alpha "$a" \
+    --output_dir results_bart_cnndm_federated > "log_bart_alpha_${a}.txt" 2>&1
+done' &
 ```
 
 ### 2. Collecting and Consolidating Metrics
@@ -873,15 +890,15 @@ python train_fed_bart_cnndm.py --config configs/bart_cnndm.yaml
 Reproduce a 2–10 client sweep for 5 rounds at α ∈ {0.5, 0.1} using the DistilBART federated pipeline:
 
 ```bash
-for a in 0.5 0.1; do \
-  /mnt/sda1/Projects/jsl/vp_gitlab/FED/FED-OPT-BERT/FED-OPT-BERT-main/.venv/bin/python \
-    tools/run_distilbart_experiments.py \
+nohup bash -c 'for a in 0.5 0.1; do
+  python tools/run_distilbart_experiments.py \
     --config configs/distilbart_cnndm_federated.yaml \
-    --min-clients 2 --max-clients 10 \
+    --min-clients 2 --max-clients 5 \
     --num-rounds 5 \
     --extra \
-    --dirichlet_alpha "$a"; \
-done
+    --dirichlet_alpha "$a" > "log_alpha_${a}.txt" 2>&1
+done' &
+
 ```
 
 Outputs:

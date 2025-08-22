@@ -120,7 +120,7 @@ class DistilBARTClient(BaseClient):
                 num_batches += 1
                 
                 # Log progress
-                if (batch_idx + 1) % self.args.log_interval == 0:
+                if (batch_idx + 1) % getattr(self.args, 'log_interval', 10) == 0:
                     logger.info(
                         f"Client {self.client_id} - Epoch: {epoch + 1}/{num_epochs}, "
                         f"Batch: {batch_idx + 1}/{len(train_loader)}, "
