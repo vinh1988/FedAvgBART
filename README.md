@@ -193,6 +193,47 @@ This project uses Weights & Biases (wandb) for experiment tracking, visualizatio
 ## Example Commands
 * See shell files prepared in `commands` directory.
 
+### Background Dirichlet alpha sweep (nohup, using experiment runner)
+
+Run a short sweep for Dirichlet α ∈ {0.1, 0.5} sequentially in the background, logging to `nohup_alpha_sweep.log`. Results are written under `--output_dir`.
+
+```bash
+nohup bash -lc '
+for a in 0.1 0.5; do
+  WANDB_MODE=offline /mnt/sda1/Projects/jsl/vp_gitlab/FED/FED-OPT-BERT/FED-OPT-BERT-main/.venv/bin/python \
+    tools/run_20news_experiments.py \
+    --min-clients 2 --max-clients 10 --num-rounds 22 \
+    --participation-rate 1.0 --dirichlet-alpha "$a" --dirichlet-min-size 50 \
+    --output_dir results_distilbart_fed_runs_20news
+done
+' > nohup_alpha_sweep.log 2>&1 &
+```
+
+Notes:
+- `tools/run_20news_experiments.py` forwards flags to `train_distilbart_20news.py`.
+- Omit `--output_dir` to use the default: `results_distilbart_fed_runs_20news`.
+
+### BART-large Dirichlet alpha sweep (nohup, using experiment runner)
+
+Run the same sweep for BART-large by pointing the experiment runner to the BART script with `--train-script`. Results are written under the specified `--output_dir`.
+
+```bash
+nohup bash -lc '
+for a in 0.1 0.5; do
+  WANDB_MODE=offline /mnt/sda1/Projects/jsl/vp_gitlab/FED/FED-OPT-BERT/FED-OPT-BERT-main/.venv/bin/python \
+    tools/run_20news_experiments.py \
+    --min-clients 2 --max-clients 10 --num-rounds 22 \
+    --participation-rate 1.0 --dirichlet-alpha "$a" --dirichlet-min-size 50 \
+    --train-script /mnt/sda1/Projects/jsl/vp_gitlab/FED/FED-OPT-BERT/20news/FED-OPT-BERT-PYTORCH/train_bart_large_20news.py \
+    --output_dir results_bart_large_fed_runs_20news
+done
+' > nohup_alpha_sweep_bart_large.log 2>&1 &
+```
+
+Notes:
+- `tools/run_20news_experiments.py` forwards flags to the script provided via `--train-script` (BART-large in this example).
+- Omit `--output_dir` to use the default of the target train script.
+
 ## Experiment Results
 
 ### Latest Training Run (2025-03-08)
