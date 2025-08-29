@@ -1,0 +1,5 @@
+model,alpha,mean_contribution_mean,mean_contribution_std,mean_contribution_min,mean_contribution_max,gini_coefficient_mean,cv_contribution_mean
+BART-large,0.1,3208.3333333333335,1217.4328963613793,2000.0,5000.0,0.0,0.0
+BART-large,0.5,3208.3333333333335,1217.4328963613793,2000.0,5000.0,0.0,0.0
+DistilBART,0.1,3208.333333333333,1168.3884537889649,2000.0,5000.0,0.0,0.0
+DistilBART,0.5,3208.333333333333,1168.3884537889649,2000.0,5000.0,0.0,0.0

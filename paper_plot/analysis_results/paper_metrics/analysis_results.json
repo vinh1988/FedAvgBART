@@ -1,0 +1,921 @@
+{
+  "centralized": {
+    "models": [
+      "DistilBART",
+      "BART-large"
+    ],
+    "metrics": {
+      "('accuracy', 'mean')": {
+        "BART-large": 0.8102,
+        "DistilBART": 0.81
+      },
+      "('accuracy', 'std')": {
+        "BART-large": 0.1211,
+        "DistilBART": 0.1224
+      },
+      "('f1', 'mean')": {
+        "BART-large": 0.8098,
+        "DistilBART": 0.8097
+      },
+      "('f1', 'std')": {
+        "BART-large": 0.1223,
+        "DistilBART": 0.1237
+      },
+      "('precision', 'mean')": {
+        "BART-large": 0.8152,
+        "DistilBART": 0.8154
+      },
+      "('precision', 'std')": {
+        "BART-large": 0.1195,
+        "DistilBART": 0.1214
+      },
+      "('recall', 'mean')": {
+        "BART-large": 0.8102,
+        "DistilBART": 0.81
+      },
+      "('recall', 'std')": {
+        "BART-large": 0.1211,
+        "DistilBART": 0.1224
+      },
+      "('loss', 'mean')": {
+        "BART-large": 0.866,
+        "DistilBART": 0.7827
+      },
+      "('loss', 'std')": {
+        "BART-large": 0.6363,
+        "DistilBART": 0.5439
+      }
+    }
+  },
+  "federated": {
+    "models": [
+      "BART-large",
+      "DistilBART"
+    ],
+    "num_clients": [
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10
+    ],
+    "alphas": [
+      0.1,
+      0.5
+    ],
+    "metrics_by_alpha": {
+      "0.1": {
+        "overall": {
+          "('accuracy', 'mean')": {
+            "BART-large": 0.871,
+            "DistilBART": 0.8428
+          },
+          "('accuracy', 'std')": {
+            "BART-large": 0.099,
+            "DistilBART": 0.1326
+          },
+          "('f1', 'mean')": {
+            "BART-large": 0.8983,
+            "DistilBART": 0.6412
+          },
+          "('f1', 'std')": {
+            "BART-large": 0.1053,
+            "DistilBART": 0.2487
+          },
+          "('precision', 'mean')": {
+            "BART-large": 0.9077,
+            "DistilBART": 0.7877
+          },
+          "('precision', 'std')": {
+            "BART-large": 0.0911,
+            "DistilBART": 0.2457
+          },
+          "('recall', 'mean')": {
+            "BART-large": 0.9017,
+            "DistilBART": 0.6116
+          },
+          "('recall', 'std')": {
+            "BART-large": 0.0993,
+            "DistilBART": 0.2321
+          },
+          "('loss', 'mean')": {
+            "BART-large": 0.2802,
+            "DistilBART": 0.3835
+          },
+          "('loss', 'std')": {
+            "BART-large": 0.192,
+            "DistilBART": 0.3539
+          }
+        },
+        "by_clients": {
+          "2": {
+            "('accuracy', 'mean')": {
+              "BART-large": 0.8393,
+              "DistilBART": 0.8241
+            },
+            "('accuracy', 'std')": {
+              "BART-large": 0.1126,
+              "DistilBART": 0.1462
+            },
+            "('f1', 'mean')": {
+              "BART-large": 0.8506,
+              "DistilBART": 0.6693
+            },
+            "('f1', 'std')": {
+              "BART-large": 0.1235,
+              "DistilBART": 0.246
+            },
+            "('precision', 'mean')": {
+              "BART-large": 0.8656,
+              "DistilBART": 0.7744
+            },
+            "('precision', 'std')": {
+              "BART-large": 0.111,
+              "DistilBART": 0.2375
+            },
+            "('recall', 'mean')": {
+              "BART-large": 0.8566,
+              "DistilBART": 0.6631
+            },
+            "('recall', 'std')": {
+              "BART-large": 0.1138,
+              "DistilBART": 0.2414
+            },
+            "('loss', 'mean')": {
+              "BART-large": 0.246,
+              "DistilBART": 0.2343
+            },
+            "('loss', 'std')": {
+              "BART-large": 0.1963,
+              "DistilBART": 0.2648
+            }
+          },
+          "3": {
+            "('accuracy', 'mean')": {
+              "BART-large": 0.8566,
+              "DistilBART": 0.8447
+            },
+            "('accuracy', 'std')": {
+              "BART-large": 0.1107,
+              "DistilBART": 0.1418
+            },
+            "('f1', 'mean')": {
+              "BART-large": 0.8709,
+              "DistilBART": 0.7019
+            },
+            "('f1', 'std')": {
+              "BART-large": 0.1185,
+              "DistilBART": 0.229
+            },
+            "('precision', 'mean')": {
+              "BART-large": 0.8838,
+              "DistilBART": 0.7978
+            },
+            "('precision', 'std')": {
+              "BART-large": 0.1022,
+              "DistilBART": 0.2186
+            },
+            "('recall', 'mean')": {
+              "BART-large": 0.8755,
+              "DistilBART": 0.697
+            },
+            "('recall', 'std')": {
+              "BART-large": 0.1098,
+              "DistilBART": 0.2092
+            },
+            "('loss', 'mean')": {
+              "BART-large": 0.2471,
+              "DistilBART": 0.253
+            },
+            "('loss', 'std')": {
+              "BART-large": 0.1975,
+              "DistilBART": 0.2891
+            }
+          },
+          "4": {
+            "('accuracy', 'mean')": {
+              "BART-large": 0.8689,
+              "DistilBART": 0.8546
+            },
+            "('accuracy', 'std')": {
+              "BART-large": 0.1115,
+              "DistilBART": 0.1449
+            },
+            "('f1', 'mean')": {
+              "BART-large": 0.8858,
+              "DistilBART": 0.692
+            },
+            "('f1', 'std')": {
+              "BART-large": 0.1185,
+              "DistilBART": 0.2316
+            },
+            "('precision', 'mean')": {
+              "BART-large": 0.9002,
+              "DistilBART": 0.8096
+            },
+            "('precision', 'std')": {
+              "BART-large": 0.096,
+              "DistilBART": 0.2265
+            },
+            "('recall', 'mean')": {
+              "BART-large": 0.8888,
+              "DistilBART": 0.6694
+            },
+            "('recall', 'std')": {
+              "BART-large": 0.1127,
+              "DistilBART": 0.2181
+            },
+            "('loss', 'mean')": {
+              "BART-large": 0.2312,
+              "DistilBART": 0.2586
+            },
+            "('loss', 'std')": {
+              "BART-large": 0.1729,
+              "DistilBART": 0.2757
+            }
+          },
+          "5": {
+            "('accuracy', 'mean')": {
+              "BART-large": 0.8726,
+              "DistilBART": 0.8521
+            },
+            "('accuracy', 'std')": {
+              "BART-large": 0.0986,
+              "DistilBART": 0.1301
+            },
+            "('f1', 'mean')": {
+              "BART-large": 0.8965,
+              "DistilBART": 0.7079
+            },
+            "('f1', 'std')": {
+              "BART-large": 0.0998,
+              "DistilBART": 0.2082
+            },
+            "('precision', 'mean')": {
+              "BART-large": 0.9084,
+              "DistilBART": 0.8341
+            },
+            "('precision', 'std')": {
+              "BART-large": 0.0808,
+              "DistilBART": 0.2102
+            },
+            "('recall', 'mean')": {
+              "BART-large": 0.8981,
+              "DistilBART": 0.6726
+            },
+            "('recall', 'std')": {
+              "BART-large": 0.0985,
+              "DistilBART": 0.1915
+            },
+            "('loss', 'mean')": {
+              "BART-large": 0.2619,
+              "DistilBART": 0.3238
+            },
+            "('loss', 'std')": {
+              "BART-large": 0.1838,
+              "DistilBART": 0.3057
+            }
+          },
+          "6": {
+            "('accuracy', 'mean')": {
+              "BART-large": 0.8687,
+              "DistilBART": 0.8416
+            },
+            "('accuracy', 'std')": {
+              "BART-large": 0.1036,
+              "DistilBART": 0.1374
+            },
+            "('f1', 'mean')": {
+              "BART-large": 0.8996,
+              "DistilBART": 0.6506
+            },
+            "('f1', 'std')": {
+              "BART-large": 0.1023,
+              "DistilBART": 0.2473
+            },
+            "('precision', 'mean')": {
+              "BART-large": 0.909,
+              "DistilBART": 0.8024
+            },
+            "('precision', 'std')": {
+              "BART-large": 0.0859,
+              "DistilBART": 0.2482
+            },
+            "('recall', 'mean')": {
+              "BART-large": 0.9011,
+              "DistilBART": 0.6083
+            },
+            "('recall', 'std')": {
+              "BART-large": 0.1002,
+              "DistilBART": 0.2253
+            },
+            "('loss', 'mean')": {
+              "BART-large": 0.2875,
+              "DistilBART": 0.3896
+            },
+            "('loss', 'std')": {
+              "BART-large": 0.211,
+              "DistilBART": 0.3439
+            }
+          },
+          "7": {
+            "('accuracy', 'mean')": {
+              "BART-large": 0.8848,
+              "DistilBART": 0.8525
+            },
+            "('accuracy', 'std')": {
+              "BART-large": 0.1031,
+              "DistilBART": 0.1359
+            },
+            "('f1', 'mean')": {
+              "BART-large": 0.9086,
+              "DistilBART": 0.5475
+            },
+            "('f1', 'std')": {
+              "BART-large": 0.1106,
+              "DistilBART": 0.2476
+            },
+            "('precision', 'mean')": {
+              "BART-large": 0.9166,
+              "DistilBART": 0.7675
+            },
+            "('precision', 'std')": {
+              "BART-large": 0.0969,
+              "DistilBART": 0.2728
+            },
+            "('recall', 'mean')": {
+              "BART-large": 0.9119,
+              "DistilBART": 0.521
+            },
+            "('recall', 'std')": {
+              "BART-large": 0.103,
+              "DistilBART": 0.2289
+            },
+            "('loss', 'mean')": {
+              "BART-large": 0.2371,
+              "DistilBART": 0.3674
+            },
+            "('loss', 'std')": {
+              "BART-large": 0.1574,
+              "DistilBART": 0.3032
+            }
+          },
+          "8": {
+            "('accuracy', 'mean')": {
+              "BART-large": 0.8717,
+              "DistilBART": 0.84
+            },
+            "('accuracy', 'std')": {
+              "BART-large": 0.0903,
+              "DistilBART": 0.1196
+            },
+            "('f1', 'mean')": {
+              "BART-large": 0.9021,
+              "DistilBART": 0.6166
+            },
+            "('f1', 'std')": {
+              "BART-large": 0.0956,
+              "DistilBART": 0.2567
+            },
+            "('precision', 'mean')": {
+              "BART-large": 0.9109,
+              "DistilBART": 0.7572
+            },
+            "('precision', 'std')": {
+              "BART-large": 0.0813,
+              "DistilBART": 0.2536
+            },
+            "('recall', 'mean')": {
+              "BART-large": 0.906,
+              "DistilBART": 0.5888
+            },
+            "('recall', 'std')": {
+              "BART-large": 0.0899,
+              "DistilBART": 0.2395
+            },
+            "('loss', 'mean')": {
+              "BART-large": 0.3075,
+              "DistilBART": 0.4471
+            },
+            "('loss', 'std')": {
+              "BART-large": 0.1878,
+              "DistilBART": 0.3479
+            }
+          },
+          "9": {
+            "('accuracy', 'mean')": {
+              "BART-large": 0.8726,
+              "DistilBART": 0.8446
+            },
+            "('accuracy', 'std')": {
+              "BART-large": 0.0895,
+              "DistilBART": 0.1173
+            },
+            "('f1', 'mean')": {
+              "BART-large": 0.906,
+              "DistilBART": 0.6667
+            },
+            "('f1', 'std')": {
+              "BART-large": 0.1053,
+              "DistilBART": 0.2377
+            },
+            "('precision', 'mean')": {
+              "BART-large": 0.9125,
+              "DistilBART": 0.8059
+            },
+            "('precision', 'std')": {
+              "BART-large": 0.098,
+              "DistilBART": 0.2354
+            },
+            "('recall', 'mean')": {
+              "BART-large": 0.9105,
+              "DistilBART": 0.624
+            },
+            "('recall', 'std')": {
+              "BART-large": 0.0955,
+              "DistilBART": 0.2188
+            },
+            "('loss', 'mean')": {
+              "BART-large": 0.3149,
+              "DistilBART": 0.4583
+            },
+            "('loss', 'std')": {
+              "BART-large": 0.2034,
+              "DistilBART": 0.3922
+            }
+          },
+          "10": {
+            "('accuracy', 'mean')": {
+              "BART-large": 0.8742,
+              "DistilBART": 0.74
+            },
+            "('accuracy', 'std')": {
+              "BART-large": 0.0916,
+              "DistilBART": 0.1442
+            },
+            "('f1', 'mean')": {
+              "BART-large": 0.9093,
+              "DistilBART": 0.3778
+            },
+            "('f1', 'std')": {
+              "BART-large": 0.091,
+              "DistilBART": 0.2535
+            },
+            "('precision', 'mean')": {
+              "BART-large": 0.9167,
+              "DistilBART": 0.5976
+            },
+            "('precision', 'std')": {
+              "BART-large": 0.0789,
+              "DistilBART": 0.2907
+            },
+            "('recall', 'mean')": {
+              "BART-large": 0.9127,
+              "DistilBART": 0.3518
+            },
+            "('recall', 'std')": {
+              "BART-large": 0.0863,
+              "DistilBART": 0.2349
+            },
+            "('loss', 'mean')": {
+              "BART-large": 0.3068,
+              "DistilBART": 0.9586
+            },
+            "('loss', 'std')": {
+              "BART-large": 0.1909,
+              "DistilBART": 0.4669
+            }
+          }
+        }
+      },
+      "0.5": {
+        "overall": {
+          "('accuracy', 'mean')": {
+            "BART-large": 0.8347,
+            "DistilBART": 0.8057
+          },
+          "('accuracy', 'std')": {
+            "BART-large": 0.0925,
+            "DistilBART": 0.1214
+          },
+          "('f1', 'mean')": {
+            "BART-large": 0.8772,
+            "DistilBART": 0.7405
+          },
+          "('f1', 'std')": {
+            "BART-large": 0.0846,
+            "DistilBART": 0.2012
+          },
+          "('precision', 'mean')": {
+            "BART-large": 0.8864,
+            "DistilBART": 0.7999
+          },
+          "('precision', 'std')": {
+            "BART-large": 0.0779,
+            "DistilBART": 0.1951
+          },
+          "('recall', 'mean')": {
+            "BART-large": 0.8806,
+            "DistilBART": 0.7317
+          },
+          "('recall', 'std')": {
+            "BART-large": 0.0803,
+            "DistilBART": 0.1888
+          },
+          "('loss', 'mean')": {
+            "BART-large": 0.4264,
+            "DistilBART": 0.5426
+          },
+          "('loss', 'std')": {
+            "BART-large": 0.3007,
+            "DistilBART": 0.4609
+          }
+        },
+        "by_clients": {
+          "2": {
+            "('accuracy', 'mean')": {
+              "BART-large": 0.856,
+              "DistilBART": 0.8451
+            },
+            "('accuracy', 'std')": {
+              "BART-large": 0.0957,
+              "DistilBART": 0.123
+            },
+            "('f1', 'mean')": {
+              "BART-large": 0.8738,
+              "DistilBART": 0.8202
+            },
+            "('f1', 'std')": {
+              "BART-large": 0.0917,
+              "DistilBART": 0.1889
+            },
+            "('precision', 'mean')": {
+              "BART-large": 0.881,
+              "DistilBART": 0.842
+            },
+            "('precision', 'std')": {
+              "BART-large": 0.0881,
+              "DistilBART": 0.1865
+            },
+            "('recall', 'mean')": {
+              "BART-large": 0.8741,
+              "DistilBART": 0.8168
+            },
+            "('recall', 'std')": {
+              "BART-large": 0.0912,
+              "DistilBART": 0.179
+            },
+            "('loss', 'mean')": {
+              "BART-large": 0.2505,
+              "DistilBART": 0.2364
+            },
+            "('loss', 'std')": {
+              "BART-large": 0.239,
+              "DistilBART": 0.3143
+            }
+          },
+          "3": {
+            "('accuracy', 'mean')": {
+              "BART-large": 0.8553,
+              "DistilBART": 0.8436
+            },
+            "('accuracy', 'std')": {
+              "BART-large": 0.0977,
+              "DistilBART": 0.1273
+            },
+            "('f1', 'mean')": {
+              "BART-large": 0.8766,
+              "DistilBART": 0.7998
+            },
+            "('f1', 'std')": {
+              "BART-large": 0.092,
+              "DistilBART": 0.2022
+            },
+            "('precision', 'mean')": {
+              "BART-large": 0.8864,
+              "DistilBART": 0.828
+            },
+            "('precision', 'std')": {
+              "BART-large": 0.0832,
+              "DistilBART": 0.1983
+            },
+            "('recall', 'mean')": {
+              "BART-large": 0.8779,
+              "DistilBART": 0.7983
+            },
+            "('recall', 'std')": {
+              "BART-large": 0.0901,
+              "DistilBART": 0.1892
+            },
+            "('loss', 'mean')": {
+              "BART-large": 0.2947,
+              "DistilBART": 0.3018
+            },
+            "('loss', 'std')": {
+              "BART-large": 0.2597,
+              "DistilBART": 0.3589
+            }
+          },
+          "4": {
+            "('accuracy', 'mean')": {
+              "BART-large": 0.8573,
+              "DistilBART": 0.8412
+            },
+            "('accuracy', 'std')": {
+              "BART-large": 0.0899,
+              "DistilBART": 0.1231
+            },
+            "('f1', 'mean')": {
+              "BART-large": 0.8849,
+              "DistilBART": 0.7932
+            },
+            "('f1', 'std')": {
+              "BART-large": 0.0836,
+              "DistilBART": 0.203
+            },
+            "('precision', 'mean')": {
+              "BART-large": 0.8917,
+              "DistilBART": 0.8321
+            },
+            "('precision', 'std')": {
+              "BART-large": 0.0787,
+              "DistilBART": 0.1996
+            },
+            "('recall', 'mean')": {
+              "BART-large": 0.8865,
+              "DistilBART": 0.7866
+            },
+            "('recall', 'std')": {
+              "BART-large": 0.0816,
+              "DistilBART": 0.19
+            },
+            "('loss', 'mean')": {
+              "BART-large": 0.3214,
+              "DistilBART": 0.3564
+            },
+            "('loss', 'std')": {
+              "BART-large": 0.2584,
+              "DistilBART": 0.3823
+            }
+          },
+          "5": {
+            "('accuracy', 'mean')": {
+              "BART-large": 0.8432,
+              "DistilBART": 0.824
+            },
+            "('accuracy', 'std')": {
+              "BART-large": 0.0942,
+              "DistilBART": 0.125
+            },
+            "('f1', 'mean')": {
+              "BART-large": 0.8792,
+              "DistilBART": 0.7617
+            },
+            "('f1', 'std')": {
+              "BART-large": 0.0852,
+              "DistilBART": 0.205
+            },
+            "('precision', 'mean')": {
+              "BART-large": 0.8883,
+              "DistilBART": 0.8118
+            },
+            "('precision', 'std')": {
+              "BART-large": 0.0774,
+              "DistilBART": 0.2018
+            },
+            "('recall', 'mean')": {
+              "BART-large": 0.881,
+              "DistilBART": 0.7577
+            },
+            "('recall', 'std')": {
+              "BART-large": 0.0826,
+              "DistilBART": 0.1906
+            },
+            "('loss', 'mean')": {
+              "BART-large": 0.379,
+              "DistilBART": 0.4417
+            },
+            "('loss', 'std')": {
+              "BART-large": 0.2878,
+              "DistilBART": 0.4215
+            }
+          },
+          "6": {
+            "('accuracy', 'mean')": {
+              "BART-large": 0.8426,
+              "DistilBART": 0.8176
+            },
+            "('accuracy', 'std')": {
+              "BART-large": 0.0899,
+              "DistilBART": 0.1179
+            },
+            "('f1', 'mean')": {
+              "BART-large": 0.8783,
+              "DistilBART": 0.7286
+            },
+            "('f1', 'std')": {
+              "BART-large": 0.0848,
+              "DistilBART": 0.2024
+            },
+            "('precision', 'mean')": {
+              "BART-large": 0.8879,
+              "DistilBART": 0.7982
+            },
+            "('precision', 'std')": {
+              "BART-large": 0.0771,
+              "DistilBART": 0.1992
+            },
+            "('recall', 'mean')": {
+              "BART-large": 0.8825,
+              "DistilBART": 0.7216
+            },
+            "('recall', 'std')": {
+              "BART-large": 0.0805,
+              "DistilBART": 0.1904
+            },
+            "('loss', 'mean')": {
+              "BART-large": 0.395,
+              "DistilBART": 0.489
+            },
+            "('loss', 'std')": {
+              "BART-large": 0.2759,
+              "DistilBART": 0.4154
+            }
+          },
+          "7": {
+            "('accuracy', 'mean')": {
+              "BART-large": 0.8322,
+              "DistilBART": 0.8073
+            },
+            "('accuracy', 'std')": {
+              "BART-large": 0.1011,
+              "DistilBART": 0.1153
+            },
+            "('f1', 'mean')": {
+              "BART-large": 0.8737,
+              "DistilBART": 0.7325
+            },
+            "('f1', 'std')": {
+              "BART-large": 0.0999,
+              "DistilBART": 0.2007
+            },
+            "('precision', 'mean')": {
+              "BART-large": 0.8841,
+              "DistilBART": 0.8006
+            },
+            "('precision', 'std')": {
+              "BART-large": 0.09,
+              "DistilBART": 0.1954
+            },
+            "('recall', 'mean')": {
+              "BART-large": 0.8776,
+              "DistilBART": 0.7225
+            },
+            "('recall', 'std')": {
+              "BART-large": 0.091,
+              "DistilBART": 0.1858
+            },
+            "('loss', 'mean')": {
+              "BART-large": 0.4442,
+              "DistilBART": 0.5511
+            },
+            "('loss', 'std')": {
+              "BART-large": 0.319,
+              "DistilBART": 0.4351
+            }
+          },
+          "8": {
+            "('accuracy', 'mean')": {
+              "BART-large": 0.8229,
+              "DistilBART": 0.7956
+            },
+            "('accuracy', 'std')": {
+              "BART-large": 0.0876,
+              "DistilBART": 0.1158
+            },
+            "('f1', 'mean')": {
+              "BART-large": 0.8752,
+              "DistilBART": 0.7268
+            },
+            "('f1', 'std')": {
+              "BART-large": 0.0821,
+              "DistilBART": 0.1991
+            },
+            "('precision', 'mean')": {
+              "BART-large": 0.8849,
+              "DistilBART": 0.7945
+            },
+            "('precision', 'std')": {
+              "BART-large": 0.076,
+              "DistilBART": 0.1981
+            },
+            "('recall', 'mean')": {
+              "BART-large": 0.8798,
+              "DistilBART": 0.7166
+            },
+            "('recall', 'std')": {
+              "BART-large": 0.0769,
+              "DistilBART": 0.1882
+            },
+            "('loss', 'mean')": {
+              "BART-large": 0.4803,
+              "DistilBART": 0.6063
+            },
+            "('loss', 'std')": {
+              "BART-large": 0.3026,
+              "DistilBART": 0.4606
+            }
+          },
+          "9": {
+            "('accuracy', 'mean')": {
+              "BART-large": 0.8289,
+              "DistilBART": 0.7866
+            },
+            "('accuracy', 'std')": {
+              "BART-large": 0.0871,
+              "DistilBART": 0.1163
+            },
+            "('f1', 'mean')": {
+              "BART-large": 0.8805,
+              "DistilBART": 0.7111
+            },
+            "('f1', 'std')": {
+              "BART-large": 0.0758,
+              "DistilBART": 0.1966
+            },
+            "('precision', 'mean')": {
+              "BART-large": 0.8889,
+              "DistilBART": 0.7821
+            },
+            "('precision', 'std')": {
+              "BART-large": 0.0708,
+              "DistilBART": 0.1894
+            },
+            "('recall', 'mean')": {
+              "BART-large": 0.8844,
+              "DistilBART": 0.7023
+            },
+            "('recall', 'std')": {
+              "BART-large": 0.0718,
+              "DistilBART": 0.18
+            },
+            "('loss', 'mean')": {
+              "BART-large": 0.4801,
+              "DistilBART": 0.6601
+            },
+            "('loss', 'std')": {
+              "BART-large": 0.2972,
+              "DistilBART": 0.4681
+            }
+          },
+          "10": {
+            "('accuracy', 'mean')": {
+              "BART-large": 0.818,
+              "DistilBART": 0.7718
+            },
+            "('accuracy', 'std')": {
+              "BART-large": 0.0887,
+              "DistilBART": 0.1185
+            },
+            "('f1', 'mean')": {
+              "BART-large": 0.8743,
+              "DistilBART": 0.7129
+            },
+            "('f1', 'std')": {
+              "BART-large": 0.077,
+              "DistilBART": 0.1923
+            },
+            "('precision', 'mean')": {
+              "BART-large": 0.884,
+              "DistilBART": 0.7781
+            },
+            "('precision', 'std')": {
+              "BART-large": 0.0716,
+              "DistilBART": 0.186
+            },
+            "('recall', 'mean')": {
+              "BART-large": 0.8785,
+              "DistilBART": 0.6973
+            },
+            "('recall', 'std')": {
+              "BART-large": 0.0734,
+              "DistilBART": 0.1806
+            },
+            "('loss', 'mean')": {
+              "BART-large": 0.51,
+              "DistilBART": 0.7225
+            },
+            "('loss', 'std')": {
+              "BART-large": 0.3035,
+              "DistilBART": 0.494
+            }
+          }
+        }
+      }
+    }
+  }
+}

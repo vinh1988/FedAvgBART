@@ -1,0 +1,119 @@
+\relax 
+\@writefile{toc}{\contentsline {section}{\numberline {I}Introduction}{1}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {II}Ease of Use}{1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {II-A}}Maintaining the Integrity of the Specifications}{1}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {III}Prepare Your Paper Before Styling}{1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-A}}Abbreviations and Acronyms}{1}\protected@file@percent }
+\newlabel{AA}{{\mbox  {III-A}}{1}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-B}}Units}{1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-C}}Equations}{1}\protected@file@percent }
+\newlabel{eq}{{1}{1}}
+\citation{b7}
+\citation{lewis2020bart,shleifer2020distilbart}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-D}}\LaTeX  -Specific Advice}{2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-E}}Some Common Mistakes}{2}\protected@file@percent }
+\newlabel{SCM}{{\mbox  {III-E}}{2}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-F}}Authors and Affiliations}{2}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {IV}Experiments}{2}\protected@file@percent }
+\newlabel{sec:experiments}{{IV}{2}}
+\citation{lewis2020bart,shleifer2020distilbart}
+\citation{lin2004rouge,papineni2002bleu,welch1947}
+\citation{li2020federated}
+\citation{zhao2018federated}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {IV-A}}Experimental Setup}{3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {IV-A}1}Dataset Description}{3}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {I}{\ignorespaces Dataset statistics and experimental setup.}}{3}\protected@file@percent }
+\newlabel{tab:dataset_stats}{{I}{3}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {IV-A}2}Pre-trained Models}{3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {IV-A}3}Federated Training Framework}{3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {IV-A}4}Evaluation Metrics}{3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {IV-A}5}Implementation Details}{3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {IV-B}}Impact of Model Size on Federated Training}{3}\protected@file@percent }
+\newlabel{sec:rq1}{{\mbox  {IV-B}}{3}}
+\@writefile{toc}{\contentsline {paragraph}{\numberline {\mbox  {IV-B}0a}Method/Setup.}{3}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{\numberline {\mbox  {IV-B}0b}Metrics.}{3}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{\numberline {\mbox  {IV-B}0c}Findings.}{3}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{\numberline {\mbox  {IV-B}0d}Takeaway.}{3}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {IV}{\ignorespaces Classification performance: DistilBART vs. BART-large (Federated Training). Best per column in \textbf  {bold}.}}{3}\protected@file@percent }
+\newlabel{tab:cls_modelsize}{{IV}{3}}
+\@writefile{lot}{\contentsline {table}{\numberline {II}{\ignorespaces BART-large federated best-round results across client counts, separated by data partition parameter $\alpha $ (\textbf  {bold} = best per column; for Loss, lower is better).}}{4}\protected@file@percent }
+\newlabel{tab:fed_best_bart}{{II}{4}}
+\@writefile{lot}{\contentsline {table}{\numberline {III}{\ignorespaces DistilBART federated best-round results across client counts, separated by data partition parameter $\alpha $ (\textbf  {bold} = best per column; for Loss, lower is better).}}{4}\protected@file@percent }
+\newlabel{tab:fed_best_distilbart}{{III}{4}}
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces Performance comparison: Centralized vs. Federated training for BART-large and DistilBART models.}}{4}\protected@file@percent }
+\newlabel{fig:performance_comparison}{{1}{4}}
+\@writefile{lot}{\contentsline {table}{\numberline {V}{\ignorespaces Classification performance: Centralized vs. Federated training (\textbf  {bold} indicates key federated results).}}{4}\protected@file@percent }
+\newlabel{tab:cls_cent_vs_fed}{{V}{4}}
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces F1 comparison: Centralized vs. Federated training for BART-large and DistilBART. Bars show mean F1 aggregated across runs; federated bars average across $\alpha $ when applicable.}}{4}\protected@file@percent }
+\newlabel{fig:performance_comparison_f1}{{2}{4}}
+\@writefile{lot}{\contentsline {table}{\numberline {VI}{\ignorespaces Client scaling analysis: Representative best-round performance (key metrics in \textbf  {bold}).}}{4}\protected@file@percent }
+\newlabel{tab:client_scaling}{{VI}{4}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces Centralized vs Federated training progress: validation accuracy over epochs/rounds. Left: Centralized validation accuracy vs epoch per model. Right: Federated validation accuracy vs communication round per model, with DistilBART shown across $\alpha \in \{0.1,0.5\}$ when applicable.}}{5}\protected@file@percent }
+\newlabel{fig:federated_progress}{{3}{5}}
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces Text generation comparisons for BART-large and DistilBART. Left: ROUGE-1 F1; Right: BLEU-4. Error bars show 95\% confidence intervals across replicates (federated aggregating across rounds and $\alpha $ as applicable). Centralized ROUGE values are converted to percentage scale to match federated reporting.}}{5}\protected@file@percent }
+\newlabel{fig:gen_cent_vs_fed}{{4}{5}}
+\@writefile{lot}{\contentsline {table}{\numberline {VII}{\ignorespaces Statistical significance analysis of key comparisons.}}{5}\protected@file@percent }
+\newlabel{tab:statistical_analysis}{{VII}{5}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {IV-C}}Effect of Client Population on Federated Fine-Tuning}{5}\protected@file@percent }
+\newlabel{sec:rq2}{{\mbox  {IV-C}}{5}}
+\@writefile{toc}{\contentsline {paragraph}{\numberline {\mbox  {IV-C}0a}Method/Setup.}{5}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces Client scaling analysis (classification): F1 vs number of clients for BART-large (IID) and DistilBART across $\alpha \in \{0.1, 0.5\}$. Lines connect means; shaded regions denote 95\% confidence intervals across runs. Here, $\alpha $ is the Dirichlet concentration controlling client heterogeneity (smaller $\alpha $ $\Rightarrow $ more non-IID).}}{5}\protected@file@percent }
+\newlabel{fig:client_scaling}{{5}{5}}
+\@writefile{toc}{\contentsline {paragraph}{\numberline {\mbox  {IV-C}0b}Metrics.}{5}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{\numberline {\mbox  {IV-C}0c}Findings.}{5}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{\numberline {\mbox  {IV-C}0d}Takeaway.}{5}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{\numberline {\mbox  {IV-C}0e}Deep Analysis: Multi-Metric Client Scaling Dynamics.}{5}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {VIII}{\ignorespaces Text generation performance: Centralized vs. Federated training (\textbf  {bold} highlights federated results).}}{6}\protected@file@percent }
+\newlabel{tab:text_generation_performance}{{VIII}{6}}
+\@writefile{lot}{\contentsline {table}{\numberline {IX}{\ignorespaces Federated text summarization: best-round performance on CNN/DailyMail (\textbf  {bold} = best per column; for Loss, lower is better).}}{6}\protected@file@percent }
+\newlabel{tab:fed_text_summarization}{{IX}{6}}
+\@writefile{lot}{\contentsline {table}{\numberline {X}{\ignorespaces Generation results: IID vs. Non-IID. Best round per model and $\alpha $ on CNN/DailyMail (Federated).}}{6}\protected@file@percent }
+\newlabel{tab:gen_iid_vs_noniid}{{X}{6}}
+\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces ROUGE-1 F1 vs number of clients for DistilBART and BART-large across $\alpha $ values. Lines connect means across client counts; shaded bands show 95\% confidence intervals across rounds. Here, $\alpha $ is the Dirichlet concentration; smaller $\alpha $ indicates more non-IID data across clients.}}{6}\protected@file@percent }
+\newlabel{fig:rq2_clients}{{6}{6}}
+\@writefile{lot}{\contentsline {table}{\numberline {XI}{\ignorespaces Classification by number of clients (key results in \textbf  {bold}).}}{6}\protected@file@percent }
+\newlabel{tab:cls_by_clients}{{XI}{6}}
+\@writefile{lof}{\contentsline {figure}{\numberline {7}{\ignorespaces Classification F1 vs number of clients with 95\% confidence intervals. BART-large (IID) maintains stable performance across client counts, while DistilBART trends are shown for $\alpha \in \{0.1, 0.5\}$ under non-IID partitions. $\alpha $ is the Dirichlet concentration controlling non-IID (smaller $\alpha $ $\Rightarrow $ greater heterogeneity).}}{7}\protected@file@percent }
+\newlabel{fig:cls_vs_clients}{{7}{7}}
+\@writefile{lof}{\contentsline {figure}{\numberline {8}{\ignorespaces Generation BLEU/ROUGE vs. number of clients with 95\% confidence intervals. Left: ROUGE-1 F1 shows DistilBART achieving peak performance at 4 clients (50.2\%) while BART-large maintains stable performance (41.7--42.2\%). Right: BLEU-4 performance with DistilBART peaking at 8 clients (14.5\%) and BART-large at 3 clients (15.2\%). Here, $\alpha $ indicates the Dirichlet concentration controlling non-IID; smaller $\alpha $ $\Rightarrow $ greater client heterogeneity.}}{7}\protected@file@percent }
+\newlabel{fig:gen_vs_clients}{{8}{7}}
+\@writefile{toc}{\contentsline {paragraph}{\numberline {\mbox  {IV-C}0f}Plot Legend Interpretation.}{7}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {IV-D}}Influence of Non-IID Data Distribution}{7}\protected@file@percent }
+\newlabel{sec:rq3}{{\mbox  {IV-D}}{7}}
+\@writefile{toc}{\contentsline {paragraph}{\numberline {\mbox  {IV-D}0a}Method/Setup.}{7}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{\numberline {\mbox  {IV-D}0b}Metrics.}{7}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{\numberline {\mbox  {IV-D}0c}Findings.}{7}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{\numberline {\mbox  {IV-D}0d}Takeaway.}{7}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {9}{\ignorespaces Client data distribution analysis across federated scenarios (2--10 clients). Each bar represents one client scenario with stacked segments showing individual client data percentages. BART-large shows slight inequality (Gini $\approx $ 0.011) while DistilBART maintains perfect equality (Gini = 0.000), demonstrating balanced experimental design.}}{7}\protected@file@percent }
+\newlabel{fig:client_data_distribution}{{9}{7}}
+\@writefile{lof}{\contentsline {figure}{\numberline {10}{\ignorespaces Per-client data share shown as 100\%-stacked bars for each federation size N. Each bar aggregates clients 1..N as percentage of total samples, averaging across runs when multiple exist.}}{8}\protected@file@percent }
+\newlabel{fig:client_share_stacked}{{10}{8}}
+\@writefile{toc}{\contentsline {paragraph}{\numberline {\mbox  {IV-D}0e}Deep Analysis: Data Distribution Fairness.}{8}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {XII}{\ignorespaces Classification results: IID vs. non-IID (best per column in \textbf  {bold}).}}{8}\protected@file@percent }
+\newlabel{tab:cls_iid_vs_noniid}{{XII}{8}}
+\@writefile{lof}{\contentsline {figure}{\numberline {11}{\ignorespaces Text generation performance scaling with 95\% confidence intervals. Left: ROUGE-1 F1 across client counts; Right: BLEU-4 across client counts. Lines connect means; shaded regions denote 95\% CI. $\alpha $ denotes the Dirichlet concentration controlling non-IID (smaller $\alpha $ $\Rightarrow $ more heterogeneity).}}{8}\protected@file@percent }
+\newlabel{fig:model_comparison_textgen}{{11}{8}}
+\@writefile{toc}{\contentsline {paragraph}{\numberline {\mbox  {IV-D}0f}Deep Analysis: Model Architecture Impact on Federated Text Generation.}{8}\protected@file@percent }
+\bibcite{b1}{1}
+\bibcite{b2}{2}
+\bibcite{b3}{3}
+\bibcite{b4}{4}
+\bibcite{b5}{5}
+\bibcite{b6}{6}
+\bibcite{b7}{7}
+\bibcite{lewis2020bart}{8}
+\bibcite{shleifer2020distilbart}{9}
+\bibcite{lin2004rouge}{10}
+\bibcite{papineni2002bleu}{11}
+\bibcite{welch1947}{12}
+\bibcite{mcmahan2017communication}{13}
+\bibcite{li2020federated}{14}
+\bibcite{zhao2018federated}{15}
+\@writefile{lof}{\contentsline {figure}{\numberline {12}{\ignorespaces Generation BLEU/ROUGE drop due to non-IID.}}{9}\protected@file@percent }
+\newlabel{fig:gen_drop_noniid}{{12}{9}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {IV-E}}Summary of Experimental Insights}{9}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {13}{\ignorespaces Summary comparison across RQs for DistilBART vs. BART-large.}}{9}\protected@file@percent }
+\newlabel{fig:summary_heatmap}{{13}{9}}
+\@writefile{lot}{\contentsline {table}{\numberline {XIII}{\ignorespaces Key takeaways by scenario (best model per setting).}}{9}\protected@file@percent }
+\newlabel{tab:key_takeaways}{{XIII}{9}}
+\@writefile{toc}{\contentsline {section}{References}{9}\protected@file@percent }
