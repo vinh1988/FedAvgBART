@@ -1,0 +1,3 @@
+client_id,train_samples,val_samples,test_samples,contribution,percentage,num_clients
+0,9992,2091,4155,9992,0.9992,2
+1,8,2909,845,8,0.0008,2

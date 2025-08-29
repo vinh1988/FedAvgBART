@@ -1,0 +1,24 @@
+{
+  "num_clients": 4,
+  "total_train_samples": 10000,
+  "total_val_samples": 5000,
+  "total_test_samples": 5000,
+  "train_samples_per_client": [
+    9916,
+    1,
+    1,
+    82
+  ],
+  "val_samples_per_client": [
+    1,
+    49,
+    1423,
+    3527
+  ],
+  "test_samples_per_client": [
+    1,
+    2127,
+    2692,
+    180
+  ]
+}

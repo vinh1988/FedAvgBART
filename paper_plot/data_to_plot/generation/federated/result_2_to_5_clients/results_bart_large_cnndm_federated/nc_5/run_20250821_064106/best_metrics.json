@@ -1,0 +1,16 @@
+{
+  "best_round": 2,
+  "best_rouge1": 43.05316520538798,
+  "best_rouge2": 20.609713559253144,
+  "best_rougeL": 30.188291169605048,
+  "best_bleu1": 33.13114269735913,
+  "best_bleu4": 13.213856963193043,
+  "best_train_loss": 1.6255577767446097,
+  "best_val_loss": 1.592105135339311,
+  "best_gini_coefficient": 0.0,
+  "best_mean_contribution": 0.0016870269014746212,
+  "best_min_contribution": 0.0006253908692933083,
+  "best_max_contribution": 0.004366812227074236,
+  "best_cv_contribution": 0.0,
+  "best_num_samples": 5000.0
+}
