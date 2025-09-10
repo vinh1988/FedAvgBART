@@ -1,85 +1,17 @@
+# A Federated Learning Approach using Pre-trained BART Model for Text Classification and Generation Tasks
+![Made With python](https://img.shields.io/badge/Made%20with-Python-brightgreen)![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)![Open Source Love svg1](https://badges.frapsoft.com/os/v1/open-source.svg?v=103)![Pytorch](https://img.shields.io/badge/Made%20with-Pytorch-green.svg)
 
-# Federated Learning with TinyBERT and HuggingFace Datasets
+### Abstract
+Federated Learning (FL) facilitates collaborative model training across decentralized datasets while safeguarding data privacy, making it highly suitable for Natural Language Processing (NLP) applications involving sensitive information. This research explores the federated fine-tuning of pre-trained BART-large and DistilBART models for text classification and generation tasks. Through comprehensive experiments on the 20News and CNN/DailyMail datasets, we simulate diverse, heterogeneous settings with varying client counts and non-independent and identically distributed (non-IID) data configurations. Our results demonstrate that federated training can surpass centralized fine-tuning in performance. Specifically, BART-large exhibits exceptional proficiency in classification tasks, while DistilBART excels in text generation, offering superior computational efficiency for resource-limited clients. Furthermore, BART-large maintains greater stability across diverse client scales, whereas non-IID data disproportionately affects smaller models, underscoring the robustness of larger architectures. These insights highlight the task-specific advantages of integrating FL with BART-based models and provide actionable guidance for deploying large language models in privacy-preserving, distributed NLP frameworks.
 
-This repository provides a streamlined framework for **federated learning** using **TinyBERT** and datasets from the HuggingFace `datasets` library, with a focus on text classification tasks such as AG_NEWS. It is designed for research and practical experimentation on resource-constrained and edge devices.
+### Paper
+(Link paper will be deployed)
 
----
-
-## 🚀 Quickstart: Federated TinyBERT on AG_NEWS
-
-### 1. Install Requirements
-
-Install all dependencies:
+### Citation
 ```
-pip install -r requirements.txt
+@inproceedings{pham2025federated,
+  title={A Federated Learning Approach using Pre-trained BART Model for Text Classification and Generation Tasks},
+  author={Pham, Quang-Vinh and Le, Xuan-Tuyen and Le, Quang-Hung},
+  year={2025}
+}
 ```
-
-Or, for just the essentials:
-```
-pip install torch torchvision torchtext transformers datasets matplotlib numpy
-```
-
-### 2. Train and Validate
-
-Run federated learning with TinyBERT on AG_NEWS and log Precision, Recall, and F1-score:
-
-```
-python main.py \
-  --exp_name fedavg_tinybert_agnews_metrics \
-  --dataset AG_NEWS \
-  --split_type iid \
-  --model_name TinyBERT \
-  --algorithm fedavg \
-  --eval_type both \
-  --eval_metrics precision recall f1 \
-  --K 10 \
-  --R 5 \
-  --C 0.2 \
-  --E 2 \
-  --B 16 \
-  --optimizer Adam \
-  --lr 2e-5 \
-  --criterion CrossEntropyLoss \
-  --device cuda \
-  --use_model_tokenizer \
-  --lr_decay_step 2
-```
-
-- **AG_NEWS** is automatically downloaded from HuggingFace datasets.
-- **TinyBERT** is loaded from HuggingFace transformers (`huawei-noah/TinyBERT_General_4L_312D`).
-- All federated learning logic is handled for you.
-
-### 3. Visualize Metrics
-
-After training, visualize Precision, Recall, and F1-score over rounds:
-```
-python commands/plot_metrics.py
-```
-This will generate a plot at:
-```
-result/fedavg_tinybert_agnews_metrics_xxxxx/metrics_over_rounds.png
-```
-where `xxxxx` is a timestamp.
-
----
-
-## Features
-- **TinyBERT**: Lightweight transformer for efficient federated learning.
-- **HuggingFace Datasets**: Seamless integration for AG_NEWS and other NLP datasets.
-- **Metrics**: Precision, Recall, F1-score tracked and visualized.
-- **Edge/Resource-Constrained Ready**: Designed for practical deployment scenarios.
-
----
-
-## Requirements
-- Python 3.8+
-- torch, torchvision, torchtext
-- transformers, datasets
-- matplotlib, numpy
-
-See `requirements.txt` for details.
-
----
-
-## Contact
-For questions or feedback, please open an issue on GitHub.
