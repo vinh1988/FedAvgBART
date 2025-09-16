@@ -3,7 +3,7 @@
 
 ### Abstract
 Abstract—This paper proposes a novel approach, which integrates Federated Learning (FL) with pre-trained BART models
-for text classification and generation tasks. In particular, we first design FedAvgBART, a framework that adapts the BART architecture for FL. We then fine-tune the pre-trained BART models using FedAvgBART to support both text classificationand generation tasks. Comprehensive experiments performed to evaluate the effectiveness and efficiency of this approach on
+for text classification and generation tasks. In particular, we first design FedAvgBART, a framework that adapts the BART architecture for FL. We then fine-tune the pre-trained BART models using FedAvgBART to support both text classification and generation tasks. Comprehensive experiments performed to evaluate the effectiveness and efficiency of this approach on
 benchmark datasets using two BART-variants of different sizes, including BART-large and DistilBART. The significant results demonstrate that federated training can surpass centralized fine-tuning in performance. Specifically, BART-large exhibits exceptional proficiency in classification tasks, while DistilBART excels in text generation, offering superior computational efficiency for resource-limited clients. Furthermore, BART-large maintains greater stability across diverse client scales, whereas non-IID
 data disproportionately affects smaller models, underscoring the robustness of larger architectures. Our implementation is available in this Github repository.
 
