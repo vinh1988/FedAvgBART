@@ -15,6 +15,7 @@ data disproportionately affects smaller models, underscoring the robustness of l
 @inproceedings{pham2025federated,
   title={A Federated Learning Approach using Pre-trained BART Models for Text Classification and Generation Tasks},
   author={Pham, Quang-Vinh and Le, Xuan-Tuyen and Le, Quang-Hung},
+booktitle={17th International Conference on Frontiers of Information Technology, Applications and Tools},
   year={2025}
 }
 ```
