@@ -8,7 +8,7 @@ benchmark datasets using two BART-variants of different sizes, including BART-la
 data disproportionately affects smaller models, underscoring the robustness of larger architectures. Our implementation is available in this Github repository.
 
 ### Paper
-(Link paper will be deployed)
+[Download Paper](paper/[Final]-A-Federated-Learning-Approach-using-Pre-trained-BART-Models-for-Text-Classification-and-Generation-Tasks.pdf)
 
 ### Citation
 If you would like to cite this paper, please use the following reference:
